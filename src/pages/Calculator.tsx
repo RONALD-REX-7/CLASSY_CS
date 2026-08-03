@@ -1,13 +1,8 @@
 import { Background } from "@/components/background";
 import { Footer } from "@/components/footer";
-import { AddSubjectForm } from "@/components/gpa/add-subject-form";
-import { EmptyState } from "@/components/gpa/empty-state";
-import { GpaRing } from "@/components/gpa/gpa-ring";
-import { GradeBreakdown } from "@/components/gpa/grade-breakdown";
+import { CgpaSummary } from "@/components/gpa/cgpa-summary";
 import { LoadingScreen } from "@/components/gpa/loading-screen";
-import { RatingBadge } from "@/components/gpa/rating-badge";
-import { StatCard } from "@/components/gpa/stat-card";
-import { SubjectRow } from "@/components/gpa/subject-row";
+import { SemesterCard } from "@/components/gpa/semester-card";
 import { Navbar } from "@/components/navbar";
 import {
   AlertDialog,
@@ -20,37 +15,31 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { useLocalStorage } from "@/hooks/use-local-storage";
-import { APP_NAME, EXPORT_FILE_NAME, STORAGE_KEYS } from "@/lib/constants";
 import {
-  buildExport,
-  computeGpa,
-  computeTotals,
+  APP_NAME,
+  CSV_FILE_NAME,
+  EXPORT_FILE_NAME,
+  STORAGE_KEYS,
+} from "@/lib/constants";
+import {
+  buildCgpaExport,
+  buildSemesterCsv,
+  computeCgpa,
+  computeCgpaTotals,
   createId,
+  createSemester,
   getRating,
-  parseImportPayload,
+  parseCgpaImport,
+  sanitizeSemesters,
   sanitizeSubjects,
+  type Semester,
   type Subject,
   type SubjectInput,
 } from "@/lib/gpa";
 import { exportGpaPdf, type ReportProfile } from "@/lib/pdf";
 import { AnimatePresence, motion } from "framer-motion";
-import {
-  BookOpen,
-  Calculator as CalculatorIcon,
-  ClipboardCopy,
-  Download,
-  FileText,
-  Gauge,
-  Layers,
-  Plus,
-  Printer,
-  RotateCcw,
-  Save,
-  TrendingUp,
-  Upload,
-} from "lucide-react";
+import { Calculator as CalculatorIcon, GraduationCap, Plus } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
@@ -65,20 +54,20 @@ interface ConfirmState {
 const EMPTY_PROFILE: ReportProfile = { studentName: "", semester: "" };
 
 export default function Calculator() {
-  const [subjects, setSubjects] = useLocalStorage<Subject[]>(
-    STORAGE_KEYS.subjects,
+  /* ------------------------------ state ------------------------------ */
+  const [semesters, setSemesters] = useLocalStorage<Semester[]>(
+    STORAGE_KEYS.semesters,
     [],
-    (raw) => sanitizeSubjects(raw).subjects,
+    (raw) => sanitizeSemesters(raw).semesters,
   );
   const [profile, setProfile] = useLocalStorage<ReportProfile>(
     STORAGE_KEYS.profile,
     EMPTY_PROFILE,
   );
-  const [editingId, setEditingId] = useState<string | null>(null);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [confirm, setConfirm] = useState<ConfirmState | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const addSectionRef = useRef<HTMLDivElement>(null);
 
   /* Brief branded splash so the app feels like an app, not a hard paint-in. */
   useEffect(() => {
@@ -86,53 +75,187 @@ export default function Calculator() {
     return () => window.clearTimeout(timer);
   }, []);
 
-  /* ------------------------------ derived state ------------------------------ */
-  const totals = useMemo(() => computeTotals(subjects), [subjects]);
-  const gpa = useMemo(() => computeGpa(subjects), [subjects]);
-  const hasData = subjects.length > 0;
-  const rating = getRating(gpa);
-  const avgCredits = totals.count > 0 ? totals.credits / totals.count : 0;
+  /* Seed one semester on first run; migrate any legacy single-semester
+     data (classycs.subjects.v1) into it so nothing is lost. */
+  useEffect(() => {
+    if (semesters.length === 0) {
+      let migrated = false;
+      try {
+        const legacy = window.localStorage.getItem(STORAGE_KEYS.subjects);
+        if (legacy) {
+          const cleaned = sanitizeSubjects(JSON.parse(legacy));
+          if (cleaned.subjects.length > 0) {
+            setSemesters([
+              {
+                id: createId(),
+                name: "Semester 1",
+                subjects: cleaned.subjects,
+                updatedAt: Date.now(),
+              },
+            ]);
+            migrated = true;
+          }
+        }
+      } catch {
+        /* ignore corrupt legacy data */
+      }
+      if (!migrated) setSemesters([createSemester("Semester 1")]);
+      return;
+    }
+    // Keep the most recent semester expanded by default.
+    setExpandedId((prev) => prev ?? semesters[semesters.length - 1].id);
+  }, [semesters, setSemesters]);
 
-  /* ------------------------------ CRUD actions ------------------------------ */
+  /* --------------------------- derived state -------------------------- */
+  const totals = useMemo(() => computeCgpaTotals(semesters), [semesters]);
+  const cgpa = useMemo(() => computeCgpa(semesters), [semesters]);
+  const hasData = totals.subjects > 0;
+  const rating = getRating(cgpa);
+  const lastUpdated = useMemo(
+    () => Math.max(0, ...semesters.map((semester) => semester.updatedAt)),
+    [semesters],
+  );
 
-  const handleAdd = (input: SubjectInput) => {
-    setSubjects((prev) => [...prev, { id: createId(), ...input }]);
+  /* --------------------------- semester CRUD -------------------------- */
+
+  const handleAddSemester = () => {
+    const semester = createSemester(`Semester ${semesters.length + 1}`);
+    setSemesters((prev) => [...prev, semester]);
+    setExpandedId(semester.id);
+    toast.success("Semester added");
+  };
+
+  const handleRenameSemester = (id: string, name: string) => {
+    const clean = name.trim();
+    if (!clean) return;
+    setSemesters((prev) =>
+      prev.map((semester) =>
+        semester.id === id
+          ? { ...semester, name: clean.slice(0, 40), updatedAt: Date.now() }
+          : semester,
+      ),
+    );
+    toast.success("Semester renamed");
+  };
+
+  const handleDuplicateSemester = (id: string) => {
+    const copyId = createId();
+    setSemesters((prev) => {
+      const index = prev.findIndex((semester) => semester.id === id);
+      if (index === -1) return prev;
+      const source = prev[index];
+      const copy: Semester = {
+        id: copyId,
+        name: `${source.name} (copy)`,
+        subjects: source.subjects.map((subject) => ({
+          ...subject,
+          id: createId(),
+        })),
+        updatedAt: Date.now(),
+      };
+      const next = [...prev];
+      next.splice(index + 1, 0, copy);
+      return next;
+    });
+    setExpandedId(copyId);
+    toast.success("Semester duplicated");
+  };
+
+  const handleDeleteSemester = (id: string) => {
+    const semester = semesters.find((item) => item.id === id);
+    if (!semester) return;
+    setConfirm({
+      title: "Delete this semester?",
+      description: `"${semester.name}" and its ${semester.subjects.length} subject${
+        semester.subjects.length === 1 ? "" : "s"
+      } will be removed from this browser. This can't be undone (unless you exported first).`,
+      confirmLabel: "Delete semester",
+      destructive: true,
+      onConfirm: () => {
+        setSemesters((prev) => {
+          const next = prev.filter((item) => item.id !== id);
+          return next.length > 0 ? next : [createSemester("Semester 1")];
+        });
+        setExpandedId((prev) => (prev === id ? null : prev));
+        toast.success("Semester deleted");
+      },
+    });
+  };
+
+  /* --------------------------- subject CRUD --------------------------- */
+
+  const handleAddSubject = (semesterId: string, input: SubjectInput) => {
+    setSemesters((prev) =>
+      prev.map((semester) =>
+        semester.id === semesterId
+          ? {
+              ...semester,
+              subjects: [...semester.subjects, { id: createId(), ...input }],
+              updatedAt: Date.now(),
+            }
+          : semester,
+      ),
+    );
     toast.success(`${input.name} added`);
   };
 
-  const handleSaveEdit = (id: string, input: SubjectInput) => {
-    setSubjects((prev) =>
-      prev.map((s) => (s.id === id ? { ...s, ...input } : s)),
+  const handleUpdateSubject = (
+    semesterId: string,
+    subjectId: string,
+    input: SubjectInput,
+  ) => {
+    setSemesters((prev) =>
+      prev.map((semester) =>
+        semester.id === semesterId
+          ? {
+              ...semester,
+              subjects: semester.subjects.map((subject) =>
+                subject.id === subjectId ? { ...subject, ...input } : subject,
+              ),
+              updatedAt: Date.now(),
+            }
+          : semester,
+      ),
     );
-    setEditingId(null);
     toast.success(`${input.name} updated`);
   };
 
-  const handleDelete = (subject: Subject) => {
-    const index = subjects.findIndex((s) => s.id === subject.id);
-    setSubjects((prev) => prev.filter((s) => s.id !== subject.id));
-    if (editingId === subject.id) setEditingId(null);
+  const handleDeleteSubject = (semesterId: string, subject: Subject) => {
+    const semester = semesters.find((item) => item.id === semesterId);
+    const index = semester
+      ? semester.subjects.findIndex((item) => item.id === subject.id)
+      : -1;
+
+    setSemesters((prev) =>
+      prev.map((item) =>
+        item.id === semesterId
+          ? {
+              ...item,
+              subjects: item.subjects.filter((s) => s.id !== subject.id),
+              updatedAt: Date.now(),
+            }
+          : item,
+      ),
+    );
+
     toast(subject.name, {
       description: "Subject deleted",
       action: {
         label: "Undo",
         onClick: () =>
-          setSubjects((prev) => {
-            const next = [...prev];
-            next.splice(Math.min(index, next.length), 0, subject);
-            return next;
-          }),
+          setSemesters((prev) =>
+            prev.map((item) => {
+              if (item.id !== semesterId) return item;
+              const next = [...item.subjects];
+              next.splice(Math.min(Math.max(index, 0), next.length), 0, subject);
+              return { ...item, subjects: next, updatedAt: Date.now() };
+            }),
+          ),
       },
     });
   };
 
-  const handleReset = () => {
-    setSubjects([]);
-    setEditingId(null);
-    toast.info("Calculator reset");
-  };
-
-  /* ------------------------------ data actions ------------------------------ */
+  /* ----------------------------- data actions ------------------------- */
 
   const handleExport = () => {
     if (!hasData) {
@@ -141,7 +264,7 @@ export default function Calculator() {
       });
       return;
     }
-    const payload = buildExport(APP_NAME, subjects);
+    const payload = buildCgpaExport(APP_NAME, semesters);
     const blob = new Blob([JSON.stringify(payload, null, 2)], {
       type: "application/json",
     });
@@ -151,10 +274,28 @@ export default function Calculator() {
     anchor.download = EXPORT_FILE_NAME;
     anchor.click();
     URL.revokeObjectURL(url);
-    toast.success("Exported as JSON");
+    toast.success("Backup exported as JSON");
   };
 
-  /** Structured, branded PDF report of the current grade sheet. */
+  const handleExportCsv = () => {
+    if (!hasData) {
+      toast.error("Nothing to export yet", {
+        description: "Add a subject first, then export a CSV summary.",
+      });
+      return;
+    }
+    const csv = buildSemesterCsv(semesters);
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = CSV_FILE_NAME;
+    anchor.click();
+    URL.revokeObjectURL(url);
+    toast.success("CSV summary exported");
+  };
+
+  /** Structured, branded PDF report of every semester + overall CGPA. */
   const handleExportPdf = () => {
     if (!hasData) {
       toast.error("Nothing to export yet", {
@@ -163,7 +304,7 @@ export default function Calculator() {
       return;
     }
     try {
-      exportGpaPdf(subjects, profile);
+      exportGpaPdf(semesters, profile);
       toast.success("PDF report downloaded");
     } catch {
       toast.error("Couldn't generate the PDF", {
@@ -176,27 +317,31 @@ export default function Calculator() {
     const reader = new FileReader();
     reader.onload = () => {
       try {
-        const { subjects: imported, skipped } = parseImportPayload(
+        const { semesters: imported, skipped } = parseCgpaImport(
           String(reader.result),
         );
         if (imported.length === 0) {
-          toast.error("No valid subjects found", {
-            description: "The file didn't contain any readable subjects.",
+          toast.error("No valid semesters found", {
+            description: "The file didn't contain any readable data.",
           });
           return;
         }
         const apply = () => {
-          setSubjects(imported);
-          setEditingId(null);
-          toast.success(`Imported ${imported.length} subject${imported.length === 1 ? "" : "s"}`);
+          setSemesters(imported);
+          setExpandedId(imported[imported.length - 1].id);
+          toast.success(
+            `Imported ${imported.length} semester${imported.length === 1 ? "" : "s"}`,
+          );
           if (skipped > 0) {
             toast.info(`${skipped} invalid entr${skipped === 1 ? "y" : "ies"} skipped`);
           }
         };
         if (hasData) {
           setConfirm({
-            title: "Replace current subjects?",
-            description: `Importing will replace your ${subjects.length} current subject${subjects.length === 1 ? "" : "s"} with ${imported.length} from the file.`,
+            title: "Replace current semesters?",
+            description: `Importing will replace your ${semesters.length} current semester${
+              semesters.length === 1 ? "" : "s"
+            } with ${imported.length} from the file.`,
             confirmLabel: "Replace & import",
             onConfirm: apply,
           });
@@ -205,7 +350,7 @@ export default function Calculator() {
         }
       } catch {
         toast.error("Invalid file", {
-          description: `That doesn't look like a ${APP_NAME} export.`,
+          description: `That doesn't look like a ${APP_NAME} backup.`,
         });
       }
     };
@@ -217,14 +362,14 @@ export default function Calculator() {
   const handleCopy = async () => {
     if (!hasData) {
       toast.error("Nothing to copy", {
-        description: "Add a subject first, then copy your GPA.",
+        description: "Add a subject first, then copy your CGPA.",
       });
       return;
     }
-    const text = `My GPA is ${gpa.toFixed(2)}/10 — ${rating.label} (via ${APP_NAME})`;
+    const text = `My CGPA is ${cgpa.toFixed(2)}/10 — ${rating.label} (via ${APP_NAME})`;
     try {
       await navigator.clipboard.writeText(text);
-      toast.success("GPA copied to clipboard");
+      toast.success("CGPA copied to clipboard");
     } catch {
       /* Clipboard API can be blocked in iframes — fall back to execCommand. */
       const textarea = document.createElement("textarea");
@@ -235,7 +380,7 @@ export default function Calculator() {
       textarea.select();
       try {
         document.execCommand("copy");
-        toast.success("GPA copied to clipboard");
+        toast.success("CGPA copied to clipboard");
       } catch {
         toast.error("Couldn't copy", { description: "Please copy manually." });
       }
@@ -245,15 +390,17 @@ export default function Calculator() {
 
   const handlePrint = () => window.print();
 
-  const scrollToAdd = () => {
-    addSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-    window.setTimeout(() => document.getElementById("add-name")?.focus(), 450);
+  const handleReset = () => {
+    const fresh = createSemester("Semester 1");
+    setSemesters([fresh]);
+    setExpandedId(fresh.id);
+    toast.info("Calculator reset");
   };
 
-  /* -------------------------------- rendering -------------------------------- */
+  /* ------------------------------- render ----------------------------- */
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen overflow-x-clip">
       <Background />
       <Navbar />
 
@@ -264,7 +411,10 @@ export default function Calculator() {
         <div className="print-header hidden items-center justify-between border-b-2 border-slate-200 pb-4">
           <div>
             <p className="font-display text-2xl font-bold">{APP_NAME}</p>
-            <p className="text-sm text-slate-500">GPA report</p>
+            <p className="text-sm text-slate-500">
+              CGPA report — {totals.semesters} semester
+              {totals.semesters === 1 ? "" : "s"}
+            </p>
             {(profile.studentName.trim() || profile.semester.trim()) && (
               <p className="mt-1.5 text-sm font-medium text-slate-700">
                 {[profile.studentName.trim(), profile.semester.trim()]
@@ -286,241 +436,87 @@ export default function Calculator() {
           className="mb-8"
         >
           <p className="text-xs font-bold uppercase tracking-[0.22em] text-indigo-500 dark:text-indigo-300">
-            GPA Calculator
+            CGPA Tracker
           </p>
           <h1 className="mt-2 font-display text-3xl font-extrabold tracking-tight sm:text-4xl">
-            Your semester, <span className="text-gradient">at a glance</span>
+            Your journey, <span className="text-gradient">semester by semester</span>
           </h1>
           <p className="mt-3 max-w-xl text-sm leading-6 text-muted-foreground sm:text-base">
-            Add your subjects, pick your grades, and watch your GPA update
-            live — everything autosaves to this browser.
+            Track every semester, watch your CGPA update live, and keep
+            everything safely on your device — no sign-up needed.
           </p>
         </motion.div>
 
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,390px)_1fr] lg:items-start">
-          {/* ================= LEFT: summary panel ================= */}
-          <section className="space-y-4 lg:sticky lg:top-24">
-            <motion.div
-              initial={{ opacity: 0, y: 18 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.08, duration: 0.5 }}
-              className="glass rounded-3xl p-6"
+        {/* ===================== CGPA dashboard ===================== */}
+        <CgpaSummary
+          semesters={semesters}
+          totals={totals}
+          cgpa={cgpa}
+          lastUpdated={lastUpdated}
+          onCopy={handleCopy}
+          onExport={handleExport}
+          onExportCsv={handleExportCsv}
+          onImport={() => fileInputRef.current?.click()}
+          onPdf={handleExportPdf}
+          onPrint={handlePrint}
+          onReset={() =>
+            setConfirm({
+              title: "Reset calculator?",
+              description: "All semesters and subjects will be removed from this browser. This can't be undone (unless you exported first).",
+              confirmLabel: "Reset everything",
+              destructive: true,
+              onConfirm: handleReset,
+            })
+          }
+        />
+
+        {/* ====================== semesters ======================== */}
+        <section className="mt-10">
+          <div className="flex items-center justify-between gap-3">
+            <h2 className="font-display text-lg font-bold tracking-tight">
+              Semesters
+              <span className="glass-soft ml-2 inline-flex min-w-7 items-center justify-center rounded-full px-2 py-0.5 text-xs font-bold tabular-nums text-muted-foreground">
+                {totals.semesters}
+              </span>
+            </h2>
+            <Button
+              type="button"
+              onClick={handleAddSemester}
+              className="btn-grad rounded-full border-0 text-white"
             >
-              <div className="flex items-center justify-between gap-3">
-                <h2 className="font-display text-sm font-bold uppercase tracking-wide text-muted-foreground">
-                  Current GPA
-                </h2>
-                <RatingBadge gpa={gpa} hasData={hasData} />
-              </div>
+              <Plus className="size-4" />
+              Add semester
+            </Button>
+          </div>
 
-              <div className="mt-6 grid place-items-center">
-                <GpaRing gpa={gpa} hasData={hasData} />
-              </div>
-
-              <div className="mt-5 min-h-[3.5rem] text-center">
-                <RatingBadge gpa={gpa} hasData={hasData} showMessage />
-              </div>
-
-              <div className="mt-6 grid grid-cols-2 gap-3">
-                <StatCard
-                  label="Subjects"
-                  value={totals.count}
-                  icon={BookOpen}
-                  iconClass="bg-sky-500/12 text-sky-600 dark:text-sky-300"
-                  delay={0.15}
-                />
-                <StatCard
-                  label="Total credits"
-                  value={totals.credits}
-                  icon={Layers}
-                  iconClass="bg-indigo-500/12 text-indigo-600 dark:text-indigo-300"
-                  delay={0.2}
-                />
-                <StatCard
-                  label="Weighted points"
-                  value={totals.weighted}
-                  icon={Gauge}
-                  iconClass="bg-violet-500/12 text-violet-600 dark:text-violet-300"
-                  delay={0.25}
-                />
-                <StatCard
-                  label="Avg credits"
-                  value={avgCredits}
-                  suffix="/subject"
-                  icon={TrendingUp}
-                  iconClass="bg-teal-500/12 text-teal-600 dark:text-teal-300"
-                  delay={0.3}
-                />
-              </div>
-            </motion.div>
-
-            {/* Report details (optional) — stamped onto the PDF header */}
-            <motion.div
-              initial={{ opacity: 0, y: 18 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.13, duration: 0.5 }}
-              className="no-print glass rounded-2xl p-4"
-            >
-              <div className="flex items-center justify-between gap-3">
-                <h2 className="font-display text-sm font-bold tracking-tight">
-                  Report details
-                </h2>
-                <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground">
-                  <FileText className="size-3.5" />
-                  Optional · on PDF
-                </span>
-              </div>
-              <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                <div className="min-w-0">
-                  <label
-                    htmlFor="report-student"
-                    className="mb-1.5 block text-xs font-semibold text-muted-foreground"
-                  >
-                    Student name
-                  </label>
-                  <Input
-                    id="report-student"
-                    value={profile.studentName}
-                    onChange={(e) =>
-                      setProfile((p) => ({ ...p, studentName: e.target.value }))
-                    }
-                    placeholder="e.g. A. Student"
-                    maxLength={60}
-                    className="bg-white/60 dark:bg-white/5"
-                  />
-                </div>
-                <div className="min-w-0">
-                  <label
-                    htmlFor="report-semester"
-                    className="mb-1.5 block text-xs font-semibold text-muted-foreground"
-                  >
-                    Semester / class
-                  </label>
-                  <Input
-                    id="report-semester"
-                    value={profile.semester}
-                    onChange={(e) =>
-                      setProfile((p) => ({ ...p, semester: e.target.value }))
-                    }
-                    placeholder="e.g. III Year · V Sem"
-                    maxLength={40}
-                    className="bg-white/60 dark:bg-white/5"
-                  />
-                </div>
-              </div>
-            </motion.div>
-
-            {/* Action toolbar */}
-            <motion.div
-              initial={{ opacity: 0, y: 18 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.18, duration: 0.5 }}
-              className="no-print glass flex flex-wrap items-center gap-2 rounded-2xl p-3"
-              aria-label="Calculator actions"
-            >
-              <Button
-                type="button"
-                size="sm"
-                onClick={handleCopy}
-                disabled={!hasData}
-                className="rounded-full"
-              >
-                <ClipboardCopy className="size-4" />
-                Copy GPA
-              </Button>
-              <Button type="button" size="sm" variant="outline" onClick={handleExport} className="rounded-full">
-                <Download className="size-4" />
-                JSON
-              </Button>
-              <Button type="button" size="sm" variant="outline" onClick={handleExportPdf} className="rounded-full">
-                <FileText className="size-4" />
-                PDF
-              </Button>
-              <Button type="button" size="sm" variant="outline" onClick={() => fileInputRef.current?.click()} className="rounded-full">
-                <Upload className="size-4" />
-                Import
-              </Button>
-              <Button type="button" size="sm" variant="outline" onClick={handlePrint} className="rounded-full">
-                <Printer className="size-4" />
-                Print
-              </Button>
-              <Button
-                type="button"
-                size="sm"
-                variant="outline"
-                onClick={() =>
-                  hasData &&
-                  setConfirm({
-                    title: "Reset calculator?",
-                    description: "All subjects will be removed from this browser. This can't be undone (unless you exported first).",
-                    confirmLabel: "Reset everything",
-                    destructive: true,
-                    onConfirm: handleReset,
-                  })
+          {/* One column on mobile, two balanced columns on desktop */}
+          <div className="mt-4 grid gap-4 lg:grid-cols-2 lg:items-start">
+            {semesters.map((semester, index) => (
+              <SemesterCard
+                key={semester.id}
+                semester={semester}
+                isCurrent={index === semesters.length - 1}
+                expanded={expandedId === semester.id}
+                canDelete={semesters.length > 1}
+                onToggle={() =>
+                  setExpandedId((prev) =>
+                    prev === semester.id ? null : semester.id,
+                  )
                 }
-                disabled={!hasData}
-                className="ml-auto rounded-full text-destructive hover:border-destructive/40"
-              >
-                <RotateCcw className="size-4" />
-                Reset
-              </Button>
-            </motion.div>
-          </section>
-
-          {/* ================= RIGHT: subjects ================= */}
-          <section className="min-w-0 space-y-5">
-            <div ref={addSectionRef} className="no-print scroll-mt-24">
-              <AddSubjectForm onAdd={handleAdd} />
-            </div>
-
-            {/* List header */}
-            <div className="flex items-center justify-between px-1">
-              <h2 className="font-display text-lg font-bold tracking-tight">
-                Your subjects
-                <span className="glass-soft ml-2 inline-flex min-w-7 items-center justify-center rounded-full px-2 py-0.5 text-xs font-bold tabular-nums text-muted-foreground">
-                  {totals.count}
-                </span>
-              </h2>
-              {hasData && (
-                <span className="hidden items-center gap-1.5 text-xs font-medium text-emerald-600 dark:text-emerald-400 sm:inline-flex">
-                  <Save className="size-3.5" />
-                  Autosaved locally
-                </span>
-              )}
-            </div>
-
-            {/* Subject list */}
-            <div className="space-y-3">
-              <AnimatePresence initial={false}>
-                {subjects.map((subject, index) => (
-                  <SubjectRow
-                    key={subject.id}
-                    subject={subject}
-                    index={index}
-                    isEditing={editingId === subject.id}
-                    onEdit={() => setEditingId(subject.id)}
-                    onCancelEdit={() => setEditingId(null)}
-                    onSave={(input) => handleSaveEdit(subject.id, input)}
-                    onDelete={() => handleDelete(subject)}
-                  />
-                ))}
-              </AnimatePresence>
-            </div>
-
-            {!hasData && <EmptyState onAdd={scrollToAdd} />}
-
-            {hasData && (
-              <motion.div
-                initial={{ opacity: 0, y: 16 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-40px" }}
-                transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-              >
-                <GradeBreakdown subjects={subjects} />
-              </motion.div>
-            )}
-          </section>
-        </div>
+                onRename={(name) => handleRenameSemester(semester.id, name)}
+                onDuplicate={() => handleDuplicateSemester(semester.id)}
+                onDelete={() => handleDeleteSemester(semester.id)}
+                onAddSubject={(input) => handleAddSubject(semester.id, input)}
+                onUpdateSubject={(subjectId, input) =>
+                  handleUpdateSubject(semester.id, subjectId, input)
+                }
+                onDeleteSubject={(subject) =>
+                  handleDeleteSubject(semester.id, subject)
+                }
+              />
+            ))}
+          </div>
+        </section>
 
         {/* Formula reference */}
         <motion.section
@@ -534,15 +530,19 @@ export default function Calculator() {
           <div className="glass flex flex-col items-center gap-2 rounded-3xl p-8 text-center sm:flex-row sm:justify-center sm:gap-6">
             <div className="flex items-center gap-3">
               <span className="grid size-10 place-items-center rounded-xl bg-indigo-500/12 text-indigo-600 dark:text-indigo-300">
-                <CalculatorIcon className="size-5" />
+                <GraduationCap className="size-5" />
               </span>
               <div className="text-left">
                 <p className="font-display text-sm font-bold">The formula</p>
-                <p className="text-xs text-muted-foreground">10-point grading scale</p>
+                <p className="text-xs text-muted-foreground">Weighted across all semesters</p>
               </div>
             </div>
             <p className="font-display text-lg font-semibold tracking-tight sm:text-xl">
-              GPA = <span className="text-gradient">Σ (Credit × Grade point)</span> ÷ Σ (Credits)
+              CGPA ={" "}
+              <span className="text-gradient">
+                Σ (Credit × Grade point)
+              </span>{" "}
+              ÷ Σ (Credits)
             </p>
           </div>
         </motion.section>
@@ -550,17 +550,17 @@ export default function Calculator() {
 
       <Footer />
 
-      {/* ---------- Floating action button ---------- */}
+      {/* ---------- Floating action button: quick-add a semester ---------- */}
       <motion.button
         type="button"
-        onClick={scrollToAdd}
+        onClick={handleAddSemester}
         initial={{ opacity: 0, scale: 0.6, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ delay: 0.6, type: "spring", stiffness: 260, damping: 18 }}
         whileHover={{ scale: 1.08 }}
         whileTap={{ scale: 0.94 }}
         className="btn-grad no-print fixed bottom-6 right-5 z-40 grid size-14 place-items-center rounded-full border-0 text-white shadow-[0_16px_36px_-12px_rgba(79,70,229,0.65)] sm:bottom-8 sm:right-8"
-        aria-label="Add a subject"
+        aria-label="Add a semester"
       >
         {!hasData && (
           <span
@@ -586,7 +586,7 @@ export default function Calculator() {
         }}
       />
 
-      {/* ---------- Shared confirm dialog (reset / import replace) ---------- */}
+      {/* ---------- Shared confirm dialog (reset / import replace / delete) ---------- */}
       <AlertDialog
         open={Boolean(confirm)}
         onOpenChange={(open) => !open && setConfirm(null)}

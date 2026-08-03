@@ -68,7 +68,7 @@ export function EmptyState({ onAdd }: { onAdd: () => void }) {
         Add your first subject — name it, set the credits and grade, and your
         GPA will appear here instantly.
       </p>
-      <Button onClick={onAdd} className="btn-grad mt-6 rounded-full border-0 px-5 text-white">
+      <Button onClick={onAdd} className="btn-grad mt-6 w-full rounded-full border-0 px-5 text-white sm:w-auto">
         <Plus className="size-4" />
         Add your first subject
       </Button>

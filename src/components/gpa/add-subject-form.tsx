@@ -103,7 +103,7 @@ export function AddSubjectForm({ onAdd }: AddSubjectFormProps) {
             maxLength={80}
             aria-invalid={Boolean(errors.name)}
             className={cn(
-              "glass-inset mt-1.5",
+              "glass-inset mt-1.5 h-11",
               errors.name && "border-destructive/60",
             )}
           />
@@ -145,7 +145,7 @@ export function AddSubjectForm({ onAdd }: AddSubjectFormProps) {
             placeholder="3"
             aria-invalid={Boolean(errors.credits)}
             className={cn(
-              "glass-inset mt-1.5 tabular-nums",
+              "glass-inset mt-1.5 h-11 tabular-nums",
               errors.credits && "border-destructive/60",
             )}
           />
@@ -181,6 +181,7 @@ export function AddSubjectForm({ onAdd }: AddSubjectFormProps) {
                 clearError("grade");
               }}
               placeholder="Select grade"
+              className="h-11"
             />
           </div>
           <AnimatePresence>

@@ -1,12 +1,14 @@
 import { APP_NAME, APP_VERSION, PDF_FILE_NAME } from "@/lib/constants";
 import {
-  computeGpa,
+  computeCgpa,
+  computeCgpaTotals,
   computeTotals,
+  formatCredits,
   getRating,
   GRADES,
   GRADE_POINTS,
   subjectPoints,
-  type Subject,
+  type Semester,
 } from "@/lib/gpa";
 import autoTable from "jspdf-autotable";
 import { jsPDF } from "jspdf";
@@ -63,158 +65,27 @@ function drawPageFooter(doc: jsPDF, pageNumber: number): void {
   });
 }
 
-/** Small uppercase section heading above each block. */
+/** Bold section heading above each block. */
 function sectionTitle(doc: jsPDF, title: string, y: number): void {
   doc.setFontSize(11);
   doc.setFont("helvetica", "bold");
   doc.setTextColor(...INK);
-  doc.text(title, 14, y);
+  doc.text(title.slice(0, 90), 14, y);
 }
 
-/**
- * Generate a structured, branded PDF report of the current grade sheet.
- *
- * Layout (academic-report style, inspired by institutional timetables):
- *   · branded header band (CLASSY_CS · GPA REPORT · generated date)
- *     — plus an optional student name / semester line
- *   · "Semester summary" — GPA card + rating chip, and a 2×2 stats grid
- *   · "Subject breakdown" table — S.NO / SUBJECT / CREDITS / GRADE /
- *     GRADE POINT / WEIGHTED, right-aligned numerics and a TOTAL row
- *   · "Grade scale reference" table (10-point)
- *   · page footer with version, privacy note and page numbers
- */
-export function exportGpaPdf(
-  subjects: Subject[],
-  profile?: ReportProfile,
+/** The standard subject table used for every semester. */
+function subjectTable(
+  doc: jsPDF,
+  semester: Semester,
+  startY: number,
 ): void {
-  const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
-  const pageWidth = doc.internal.pageSize.getWidth();
-  const pageHeight = doc.internal.pageSize.getHeight();
   const margin = 14;
-  const contentWidth = pageWidth - margin * 2;
-
-  const totals = computeTotals(subjects);
-  const gpa = computeGpa(subjects);
-  const rating = getRating(gpa);
-  const ratingRgb = hexToRgb(rating.ringFrom);
-  const avgCredits = totals.count > 0 ? totals.credits / totals.count : 0;
-  const generated = new Date().toLocaleDateString(undefined, {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
-
-  /* ------------------------- header band ------------------------- */
-  doc.setFillColor(...INDIGO);
-  doc.rect(0, 0, pageWidth, 30, "F");
-  doc.setFillColor(...SKY);
-  doc.rect(0, 30, pageWidth, 1.4, "F");
-
-  doc.setTextColor(255, 255, 255);
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(20);
-  doc.text(APP_NAME, margin, 13.5);
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(9);
-  doc.setTextColor(219, 226, 255);
-  doc.text("GPA REPORT  ·  structured grade summary", margin, 20);
-  doc.setFontSize(8.5);
-  doc.setTextColor(255, 255, 255);
-  doc.text(generated, pageWidth - margin, 13.5, { align: "right" });
-  doc.setFontSize(8);
-  doc.setTextColor(219, 226, 255);
-  doc.text(`v${APP_VERSION}`, pageWidth - margin, 20, { align: "right" });
-
-  // Optional student / semester line — only when something is filled in.
-  const profileLine = [
-    profile?.studentName?.trim() ? `Student: ${profile.studentName.trim()}` : "",
-    profile?.semester?.trim() ? `Semester: ${profile.semester.trim()}` : "",
-  ]
-    .filter(Boolean)
-    .join("   ·   ");
-
-  if (profileLine) {
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(8.5);
-    doc.setTextColor(255, 255, 255);
-    doc.text(profileLine, margin, 26.2);
-  }
-
-  /* --------------------- semester summary ------------------------ */
-  let y = 43;
-  sectionTitle(doc, "Semester summary", y);
-  y += 6;
-
-  const cardH = 36;
-  const gap = 4;
-  const leftW = (contentWidth - gap) * 0.42;
-  const rightW = contentWidth - gap - leftW;
-
-  // GPA card
-  doc.setFillColor(...TINT);
-  doc.setDrawColor(...ratingRgb);
-  doc.setLineWidth(0.5);
-  doc.roundedRect(margin, y, leftW, cardH, 4, 4, "FD");
-
-  doc.setFontSize(7.5);
-  doc.setFont("helvetica", "bold");
-  doc.setTextColor(...MUTED);
-  doc.text("CURRENT GPA", margin + 5, y + 7.5);
-
-  doc.setFontSize(24);
-  doc.setFont("helvetica", "bold");
-  doc.setTextColor(...ratingRgb);
-  doc.text(`${gpa > 0 ? gpa.toFixed(2) : "—"} / 10`, margin + 5, y + 18);
-
-  // Rating chip
-  const chipLabel = totals.count > 0 ? rating.label : "No data";
-  doc.setFillColor(...ratingRgb);
-  doc.roundedRect(margin + 5, y + 22.5, 6 + chipLabel.length * 1.7 + 4, 6.5, 3.2, 3.2, "F");
-  doc.setFontSize(8);
-  doc.setFont("helvetica", "bold");
-  doc.setTextColor(255, 255, 255);
-  doc.text(chipLabel, margin + 5 + 3.4, y + 27.1);
-
-  // Stats grid (2 × 2) — label near the top, value vertically centered.
-  const stats: { label: string; value: string }[] = [
-    { label: "SUBJECTS", value: String(totals.count) },
-    { label: "TOTAL CREDITS", value: formatPoint(totals.credits) },
-    { label: "WEIGHTED POINTS", value: formatPoint(totals.weighted) },
-    { label: "AVG CREDITS / SUBJECT", value: formatPoint(avgCredits) },
-  ];
-  const cellW = (rightW - gap) / 2;
-  const cellH = (cardH - gap) / 2;
-
-  stats.forEach((stat, i) => {
-    const col = i % 2;
-    const row = Math.floor(i / 2);
-    const x = margin + leftW + gap + col * (cellW + gap);
-    const cy = y + row * (cellH + gap);
-    doc.setFillColor(255, 255, 255);
-    doc.setDrawColor(...LINE);
-    doc.setLineWidth(0.3);
-    doc.roundedRect(x, cy, cellW, cellH, 3.5, 3.5, "FD");
-
-    doc.setFontSize(7);
-    doc.setFont("helvetica", "bold");
-    doc.setTextColor(...MUTED);
-    doc.text(stat.label, x + 4, cy + 6.5);
-    doc.setFontSize(13);
-    doc.setFont("helvetica", "bold");
-    doc.setTextColor(...INK);
-    doc.text(stat.value, x + 4, cy + 12.5);
-  });
-
-  y += cardH + 14;
-
-  /* ----------------------- subject breakdown --------------------- */
-  sectionTitle(doc, "Subject breakdown", y);
-
+  const totals = computeTotals(semester.subjects);
   autoTable(doc, {
-    startY: y + 4,
+    startY,
     margin: { left: margin, right: margin },
     head: [["S.NO", "SUBJECT", "CREDITS", "GRADE", "GRADE POINT", "WEIGHTED"]],
-    body: subjects.map((subject, i) => [
+    body: semester.subjects.map((subject, i) => [
       String(i + 1),
       subject.name,
       formatPoint(subject.credits),
@@ -268,13 +139,174 @@ export function exportGpaPdf(
     },
     didDrawPage: (data) => drawPageFooter(doc, data.pageNumber),
   });
+}
+
+/**
+ * Generate a structured, branded multi-semester PDF report.
+ *
+ * Layout:
+ *   · branded header band (CLASSY_CS · CGPA REPORT · generated date)
+ *     — plus an optional student name / semester line
+ *   · "Cumulative CGPA" summary — CGPA card + rating chip and a 2×2 stats grid
+ *   · one "Semester name — GPA · credits" section with a subject table
+ *     (S.NO / SUBJECT / CREDITS / GRADE / GRADE POINT / WEIGHTED + TOTAL row)
+ *   · grade scale reference table (10-point)
+ *   · page footer with version, privacy note and page numbers
+ */
+export function exportGpaPdf(
+  semesters: Semester[],
+  profile?: ReportProfile,
+): void {
+  const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+  const margin = 14;
+  const contentWidth = pageWidth - margin * 2;
+
+  const totals = computeCgpaTotals(semesters);
+  const cgpa = computeCgpa(semesters);
+  const rating = getRating(cgpa);
+  const ratingRgb = hexToRgb(rating.ringFrom);
+  const hasData = totals.subjects > 0;
+  const generated = new Date().toLocaleDateString(undefined, {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+
+  /* ------------------------- header band ------------------------- */
+  doc.setFillColor(...INDIGO);
+  doc.rect(0, 0, pageWidth, 30, "F");
+  doc.setFillColor(...SKY);
+  doc.rect(0, 30, pageWidth, 1.4, "F");
+
+  doc.setTextColor(255, 255, 255);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(20);
+  doc.text(APP_NAME, margin, 13.5);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(9);
+  doc.setTextColor(219, 226, 255);
+  doc.text("CGPA REPORT  ·  multi-semester grade summary", margin, 20);
+  doc.setFontSize(8.5);
+  doc.setTextColor(255, 255, 255);
+  doc.text(generated, pageWidth - margin, 13.5, { align: "right" });
+  doc.setFontSize(8);
+  doc.setTextColor(219, 226, 255);
+  doc.text(`v${APP_VERSION}`, pageWidth - margin, 20, { align: "right" });
+
+  // Optional student / semester line — only when something is filled in.
+  const profileLine = [
+    profile?.studentName?.trim() ? `Student: ${profile.studentName.trim()}` : "",
+    profile?.semester?.trim() ? `Semester: ${profile.semester.trim()}` : "",
+  ]
+    .filter(Boolean)
+    .join("   ·   ");
+
+  if (profileLine) {
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(8.5);
+    doc.setTextColor(255, 255, 255);
+    doc.text(profileLine, margin, 26.2);
+  }
+
+  /* --------------------- cumulative summary ---------------------- */
+  let y = 43;
+  sectionTitle(doc, "Cumulative CGPA", y);
+  y += 6;
+
+  const cardH = 36;
+  const gap = 4;
+  const leftW = (contentWidth - gap) * 0.42;
+  const rightW = contentWidth - gap - leftW;
+
+  // CGPA card
+  doc.setFillColor(...TINT);
+  doc.setDrawColor(...ratingRgb);
+  doc.setLineWidth(0.5);
+  doc.roundedRect(margin, y, leftW, cardH, 4, 4, "FD");
+
+  doc.setFontSize(7.5);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(...MUTED);
+  doc.text("CUMULATIVE CGPA", margin + 5, y + 7.5);
+
+  doc.setFontSize(24);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(...ratingRgb);
+  doc.text(`${hasData ? cgpa.toFixed(2) : "—"} / 10`, margin + 5, y + 18);
+
+  // Rating chip
+  const chipLabel = hasData ? rating.label : "No data";
+  doc.setFillColor(...ratingRgb);
+  doc.roundedRect(margin + 5, y + 22.5, 6 + chipLabel.length * 1.7 + 4, 6.5, 3.2, 3.2, "F");
+  doc.setFontSize(8);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(255, 255, 255);
+  doc.text(chipLabel, margin + 5 + 3.4, y + 27.1);
+
+  // Stats grid (2 × 2)
+  const stats: { label: string; value: string }[] = [
+    { label: "SEMESTERS", value: String(totals.semesters) },
+    { label: "TOTAL SUBJECTS", value: String(totals.subjects) },
+    { label: "TOTAL CREDITS", value: formatPoint(totals.credits) },
+    { label: "TOTAL POINTS", value: formatPoint(totals.weighted) },
+  ];
+  const cellW = (rightW - gap) / 2;
+  const cellH = (cardH - gap) / 2;
+
+  stats.forEach((stat, i) => {
+    const col = i % 2;
+    const row = Math.floor(i / 2);
+    const x = margin + leftW + gap + col * (cellW + gap);
+    const cy = y + row * (cellH + gap);
+    doc.setFillColor(255, 255, 255);
+    doc.setDrawColor(...LINE);
+    doc.setLineWidth(0.3);
+    doc.roundedRect(x, cy, cellW, cellH, 3.5, 3.5, "FD");
+
+    doc.setFontSize(7);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(...MUTED);
+    doc.text(stat.label, x + 4, cy + 6.5);
+    doc.setFontSize(13);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(...INK);
+    doc.text(stat.value, x + 4, cy + 12.5);
+  });
+
+  y += cardH + 14;
+
+  /* --------------------- per-semester tables --------------------- */
+  for (const semester of semesters) {
+    if (semester.subjects.length === 0) continue;
+
+    const semTotals = computeTotals(semester.subjects);
+    const semGpa =
+      semTotals.credits > 0 ? semTotals.weighted / semTotals.credits : 0;
+
+    // Fresh page when the next section won't fit comfortably.
+    if (y + 16 > pageHeight - 20) {
+      doc.addPage();
+      y = 24;
+    }
+
+    sectionTitle(
+      doc,
+      `${semester.name}  —  GPA ${semGpa.toFixed(2)} · ${formatCredits(
+        semTotals.credits,
+      )} credits`,
+      y,
+    );
+
+    subjectTable(doc, semester, y + 4);
+    y =
+      ((doc as unknown as { lastAutoTable?: { finalY: number } }).lastAutoTable
+        ?.finalY ?? y + 10) + 12;
+  }
 
   /* --------------------- grade scale reference ------------------- */
-  const afterTable =
-    (doc as unknown as { lastAutoTable?: { finalY: number } }).lastAutoTable
-      ?.finalY ?? y + 10;
-
-  let scaleY = afterTable + 14;
+  let scaleY = y;
   if (scaleY + 36 > pageHeight - 16) {
     doc.addPage();
     scaleY = 24;
@@ -321,7 +353,7 @@ export function exportGpaPdf(
   doc.setFont("helvetica", "normal");
   doc.setTextColor(...MUTED);
   doc.text(
-    `GPA = Σ (Credit × Grade point) ÷ Σ (Credits) · generated with ${APP_NAME}`,
+    `CGPA = Σ (Credit × Grade point) ÷ Σ (Credits) · generated with ${APP_NAME}`,
     margin,
     noteY + 5,
   );

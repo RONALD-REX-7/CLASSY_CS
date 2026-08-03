@@ -1,11 +1,12 @@
 /**
- * GPA domain logic — pure functions, no UI concerns.
+ * GPA / CGPA domain logic — pure functions, no UI concerns.
  *
  * Grade mapping (10-point scale):
  *   O=10, A+=9, A=8, B+=7, B=6, C=5, U=0, AB=0
  *
- * Formula:
- *   GPA = Σ(credit × grade point) / Σ(credits)
+ * Formulas:
+ *   Semester GPA = Σ(credit × grade point) / Σ(credits)
+ *   CGPA          = Σ(grade points across all semesters) / Σ(credits across all semesters)
  */
 
 /** Valid grade values, in display order. */
@@ -315,4 +316,178 @@ export function parseImportPayload(
       ? (parsed as Record<string, unknown>).subjects
       : parsed;
   return sanitizeSubjects(payload);
+}
+
+/* ------------------------------------------------------------------ */
+/* Semesters + CGPA                                                    */
+/* ------------------------------------------------------------------ */
+
+/** A semester bucket that holds its own subjects. */
+export interface Semester {
+  /** Stable unique id (uuid). */
+  id: string;
+  /** Display name, e.g. "Semester 1" or "III Year · V Sem". */
+  name: string;
+  subjects: Subject[];
+  /** Epoch ms of the last edit — used for the "last updated" readout. */
+  updatedAt: number;
+}
+
+/** Create a fresh, empty semester. */
+export function createSemester(name = "Semester 1"): Semester {
+  return { id: createId(), name, subjects: [], updatedAt: Date.now() };
+}
+
+/** Aggregated totals across every semester. */
+export interface CgpaTotals {
+  semesters: number;
+  subjects: number;
+  credits: number;
+  weighted: number;
+}
+
+/** Sum subjects, credits and weighted points across all semesters. */
+export function computeCgpaTotals(semesters: Semester[]): CgpaTotals {
+  let subjects = 0;
+  let credits = 0;
+  let weighted = 0;
+  for (const semester of semesters) {
+    const totals = computeTotals(semester.subjects);
+    subjects += totals.count;
+    credits += totals.credits;
+    weighted += totals.weighted;
+  }
+  return { semesters: semesters.length, subjects, credits, weighted };
+}
+
+/**
+ * Weighted CGPA across all semesters:
+ *   CGPA = Σ(grade points across all semesters) ÷ Σ(credits across all semesters)
+ */
+export function computeCgpa(semesters: Semester[]): number {
+  const { credits, weighted } = computeCgpaTotals(semesters);
+  if (credits <= 0) return 0;
+  return weighted / credits;
+}
+
+/** Coerce unknown data into a clean Semester list. Anything invalid is dropped. */
+export function sanitizeSemesters(data: unknown): {
+  semesters: Semester[];
+  skipped: number;
+} {
+  if (!Array.isArray(data)) return { semesters: [], skipped: 0 };
+
+  const semesters: Semester[] = [];
+  let skipped = 0;
+
+  for (const item of data) {
+    if (!item || typeof item !== "object") {
+      skipped++;
+      continue;
+    }
+    const record = item as Record<string, unknown>;
+    const name =
+      typeof record.name === "string" && record.name.trim()
+        ? record.name.trim().slice(0, 40)
+        : "";
+    const cleaned = sanitizeSubjects(record.subjects);
+
+    if (!name) {
+      skipped++;
+      continue;
+    }
+
+    semesters.push({
+      id: createId(),
+      name,
+      subjects: cleaned.subjects,
+      updatedAt:
+        typeof record.updatedAt === "number" && isFinite(record.updatedAt)
+          ? record.updatedAt
+          : Date.now(),
+    });
+  }
+
+  return { semesters, skipped };
+}
+
+export interface CgpaExportPayload {
+  app: string;
+  version: number;
+  exportedAt: string;
+  type: "cgpa";
+  semesters: { name: string; subjects: Omit<Subject, "id">[] }[];
+}
+
+/** Build the portable JSON backup (all semesters). */
+export function buildCgpaExport(
+  app: string,
+  semesters: Semester[],
+): CgpaExportPayload {
+  return {
+    app,
+    version: 2,
+    exportedAt: new Date().toISOString(),
+    type: "cgpa",
+    semesters: semesters.map((semester) => ({
+      name: semester.name,
+      subjects: semester.subjects.map(({ name, credits, grade }) => ({
+        name,
+        credits,
+        grade,
+      })),
+    })),
+  };
+}
+
+/** Parse a JSON backup — new CGPA format, or a legacy single-semester export. */
+export function parseCgpaImport(json: string): {
+  semesters: Semester[];
+  skipped: number;
+} {
+  const parsed: unknown = JSON.parse(json);
+  if (parsed && typeof parsed === "object") {
+    const record = parsed as Record<string, unknown>;
+    if (Array.isArray(record.semesters)) {
+      return sanitizeSemesters(record.semesters);
+    }
+    // Legacy single-semester payload — wrap it into one semester.
+    if (record.subjects !== undefined) {
+      return sanitizeSemesters([
+        { name: "Semester 1", subjects: record.subjects },
+      ]);
+    }
+  }
+  return sanitizeSemesters(parsed);
+}
+
+/** Compact CSV summary of every semester + subject (spreadsheet-friendly). */
+export function buildSemesterCsv(semesters: Semester[]): string {
+  const escape = (value: string | number) =>
+    `"${String(value).replace(/"/g, '""')}"`;
+  const rows: string[][] = [
+    ["Semester", "Subject", "Credits", "Grade", "Grade Points", "Weighted"],
+  ];
+  for (const semester of semesters) {
+    for (const subject of semester.subjects) {
+      rows.push([
+        semester.name,
+        subject.name,
+        String(subject.credits),
+        subject.grade,
+        String(GRADE_POINTS[subject.grade]),
+        String(subjectPoints(subject)),
+      ]);
+    }
+  }
+  const totals = computeCgpaTotals(semesters);
+  rows.push([
+    "",
+    "TOTAL",
+    String(totals.credits),
+    "",
+    "",
+    String(totals.weighted),
+  ]);
+  return rows.map((row) => row.map(escape).join(",")).join("\n");
 }
