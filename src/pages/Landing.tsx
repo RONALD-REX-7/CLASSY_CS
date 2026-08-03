@@ -84,12 +84,12 @@ const MOCK_SUBJECTS = [
 function HeroPanel() {
   return (
     <div className="relative">
-      {/* Main panel */}
+      {/* Main panel — slightly tighter padding on mobile so the ring is the focus */}
       <motion.div
         initial={{ opacity: 0, y: 26, rotate: -1 }}
         animate={{ opacity: 1, y: 0, rotate: 0 }}
         transition={{ delay: 0.25, duration: 0.7, ease: EASE }}
-        className="glass rounded-3xl p-7 shadow-[0_30px_70px_-30px_rgba(58,84,180,0.4)] sm:p-8"
+        className="glass rounded-3xl p-6 shadow-[0_30px_70px_-30px_rgba(58,84,180,0.4)] sm:p-8"
       >
         {/* panel header — subtle, centered over the ring */}
         <div className="flex items-center justify-center gap-2">
@@ -97,26 +97,26 @@ function HeroPanel() {
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-70" />
             <span className="relative inline-flex size-2.5 rounded-full bg-emerald-500" />
           </span>
-          <p className="text-xs font-bold uppercase tracking-[0.18em] text-muted-foreground">
+          <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground sm:text-xs sm:tracking-[0.18em]">
             Semester Result
           </p>
         </div>
 
         {/* GPA ring — the focal point, perfectly centered */}
-        <div className="mt-7 grid place-items-center">
+        <div className="mt-6 grid place-items-center">
           <GpaRing gpa={8.82} hasData size={150} strokeWidth={14} />
         </div>
 
         {/* rating + compact stats */}
-        <div className="mt-6 flex flex-col items-center gap-2.5">
+        <div className="mt-5 flex flex-col items-center gap-2">
           <RatingBadge gpa={8.82} hasData />
           <p className="text-xs font-medium tabular-nums text-muted-foreground">
             7 credits · 2 subjects
           </p>
         </div>
 
-        {/* fake subject rows */}
-        <div className="mt-6 space-y-2">
+        {/* fake subject rows — compact and easy to scan */}
+        <div className="mt-5 space-y-2">
           {MOCK_SUBJECTS.map((row) => (
             <div
               key={row.name}
@@ -224,14 +224,16 @@ export default function Landing() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.4 }}
-      className="min-h-screen"
+      className="min-h-screen overflow-x-clip"
     >
       <Background />
       <Navbar />
 
       {/* ============================ HERO ============================ */}
       <section className="relative overflow-hidden">
-        <div className="mx-auto grid max-w-6xl items-center gap-14 px-4 pb-20 pt-16 sm:px-6 lg:grid-cols-2 lg:gap-12 lg:pb-28 lg:pt-24">
+        {/* Mobile: headline → CTAs → result card, stacked in one column.
+            Desktop: unchanged two-column layout. */}
+        <div className="mx-auto grid max-w-6xl items-center gap-12 px-4 pb-16 pt-10 sm:px-6 lg:grid-cols-2 lg:gap-12 lg:pb-28 lg:pt-24">
           {/* Copy */}
           <div>
             <motion.div {...fadeUp(0.05)}>
@@ -243,21 +245,22 @@ export default function Landing() {
 
             <motion.h1
               {...fadeUp(0.12)}
-              className="mt-6 font-display text-4xl font-extrabold leading-[1.08] tracking-tight sm:text-5xl lg:text-6xl"
+              className="mt-5 font-display text-[2.1rem] font-extrabold leading-[1.12] tracking-tight sm:text-5xl sm:leading-[1.08] lg:text-6xl"
             >
               Your GPA,
               <br />
               <span className="text-gradient">beautifully calculated.</span>
             </motion.h1>
 
+            {/* CTAs — full-width, thumb-friendly on mobile; inline on desktop */}
             <motion.div
               {...fadeUp(0.2)}
-              className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4"
+              className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4"
             >
               <Button
                 asChild
                 size="lg"
-                className="btn-grad h-12 whitespace-nowrap rounded-full border-0 px-7 text-base text-white"
+                className="btn-grad h-12 w-full whitespace-nowrap rounded-full border-0 px-7 text-base text-white sm:w-auto"
               >
                 <Link to="/calculator">
                   Start calculating
@@ -268,7 +271,7 @@ export default function Landing() {
                 asChild
                 size="lg"
                 variant="outline"
-                className="glass-soft h-12 whitespace-nowrap rounded-full border-0 px-7 text-base"
+                className="glass-soft h-12 w-full whitespace-nowrap rounded-full border-0 px-7 text-base sm:w-auto"
               >
                 <Link to="/#scale">See the grade scale</Link>
               </Button>
@@ -276,7 +279,7 @@ export default function Landing() {
 
             <motion.ul
               {...fadeUp(0.28)}
-              className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-2 text-xs font-semibold text-muted-foreground"
+              className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-2 text-xs font-semibold text-muted-foreground"
             >
               <li className="flex items-center gap-1.5">
                 <WifiOff className="size-3.5 text-sky-500" /> Works offline
@@ -298,7 +301,7 @@ export default function Landing() {
       </section>
 
       {/* ========================== FEATURES ========================== */}
-      <section id="features" className="scroll-mt-24 py-16 lg:py-24">
+      <section id="features" className="scroll-mt-24 py-14 lg:py-24">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <SectionHeading
             eyebrow="Featured by SPIRIT"
@@ -309,7 +312,7 @@ export default function Landing() {
             }
           />
 
-          <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-10 grid gap-4 sm:mt-12 sm:grid-cols-2 lg:grid-cols-4">
             {FEATURES.map((feature, i) => (
               <motion.div
                 key={feature.title}
@@ -338,7 +341,7 @@ export default function Landing() {
       </section>
 
       {/* ======================== GRADE SCALE ========================= */}
-      <section id="scale" className="scroll-mt-24 py-16 lg:py-24">
+      <section id="scale" className="scroll-mt-24 py-14 lg:py-24">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <SectionHeading
             eyebrow="Grade scale"
@@ -350,7 +353,7 @@ export default function Landing() {
             sub="Every grade maps to a point value. Your GPA is the credit-weighted average of them all."
           />
 
-          <div className="mt-12 grid gap-6 lg:grid-cols-[1fr_1.2fr] lg:items-start">
+          <div className="mt-10 grid gap-6 sm:mt-12 lg:grid-cols-[1fr_1.2fr] lg:items-start">
             {/* Formula card */}
             <motion.div
               initial={{ opacity: 0, x: -20 }}
@@ -431,6 +434,106 @@ export default function Landing() {
                 >
                   <span
                     className="mx-auto block size-3 rounded-full"
-   
+                    style={{ background: band.ringFrom, boxShadow: `0 0 14px ${band.glow}` }}
+                    aria-hidden="true"
+                  />
+                  <p className={cn("mt-2.5 font-display text-sm font-bold", band.text)}>
+                    {band.label}
+                  </p>
+                  <p className="mt-0.5 text-xs font-semibold tabular-nums text-muted-foreground">
+                    {band.range}
+                  </p>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+        </div>
+      </section>
 
-[FILE_TOO_LARGE]: The combined read_files output exceeded the 100,000 character hard limit. This file was truncated after 16,574 characters. Read it separately or use code_search for the relevant section.
+      {/* ======================= HOW IT WORKS ========================= */}
+      <section id="how" className="scroll-mt-24 py-14 lg:py-24">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+          <SectionHeading
+            eyebrow="How it works"
+            title={
+              <>
+                Three steps to <span className="text-gradient">clarity</span>
+              </>
+            }
+            sub="No accounts, no installs — just open, add, and go."
+          />
+
+          <div className="mt-10 grid gap-5 sm:mt-12 md:grid-cols-3">
+            {STEPS.map((item, i) => (
+              <motion.div
+                key={item.step}
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-60px" }}
+                transition={{ delay: i * 0.12, duration: 0.5, ease: EASE }}
+                className="glass relative rounded-3xl p-6"
+              >
+                <span className="font-display text-4xl font-extrabold text-indigo-500/25 dark:text-indigo-300/20">
+                  {item.step}
+                </span>
+                <h3 className="mt-4 font-display text-lg font-bold tracking-tight">
+                  {item.title}
+                </h3>
+                <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                  {item.body}
+                </p>
+                {i < STEPS.length - 1 && (
+                  <ArrowRight className="absolute -right-4 top-1/2 hidden size-6 -translate-y-1/2 text-indigo-400/60 md:block" />
+                )}
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ========================== CTA ============================== */}
+      <section className="py-14 lg:py-24">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-80px" }}
+            transition={{ duration: 0.6, ease: EASE }}
+            className="btn-grad relative overflow-hidden rounded-[2rem] p-8 text-center sm:p-14"
+          >
+            {/* decorative rings */}
+            <div className="pointer-events-none absolute -right-16 -top-16 size-64 rounded-full border border-white/20" />
+            <div className="pointer-events-none absolute -right-8 -top-8 size-40 rounded-full border border-white/20" />
+            <div className="pointer-events-none absolute -bottom-20 -left-10 size-72 rounded-full bg-white/10 blur-2xl" />
+
+            <div className="relative">
+              <Logo size={44} className="mx-auto" />
+              <h2 className="mt-6 font-display text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
+                Ready to see your GPA?
+              </h2>
+              <p className="mx-auto mt-4 max-w-md text-sm leading-6 text-indigo-100 sm:text-base">
+                Open the calculator and add your first subject — your average
+                appears instantly. Free, private, and offline-friendly.
+              </p>
+              <Button
+                asChild
+                size="lg"
+                className="mt-8 h-12 w-full rounded-full border border-white/40 bg-white px-8 text-base font-bold text-indigo-700 shadow-lg transition-transform hover:scale-105 active:scale-95 sm:w-auto"
+              >
+                <Link to="/calculator">
+                  Open the calculator
+                  <ArrowRight className="size-4" />
+                </Link>
+              </Button>
+              <p className="mt-4 text-xs font-medium text-indigo-100/90">
+                No sign-up · Free forever · Works offline
+              </p>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      <Footer />
+    </motion.div>
+  );
+}
