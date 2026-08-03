@@ -110,6 +110,46 @@ function RouteSyncer() {
   return null;
 }
 
+/**
+ * Route-aware scrolling:
+ *  · navigations without a hash scroll to the top of the new page
+ *  · navigations with a hash (e.g. /#scale) smooth-scroll to that section,
+ *    so the "Features / Grade scale / How it works" links actually work.
+ * The landing page is lazy-loaded, so scroll attempts are retried a few
+ * times to wait for the section to be mounted.
+ */
+function ScrollManager() {
+  const { pathname, hash } = useLocation();
+
+  useEffect(() => {
+    if (!hash) {
+      window.scrollTo(0, 0);
+      return;
+    }
+
+    const id = decodeURIComponent(hash.slice(1));
+    const timers: number[] = [];
+    const tryScroll = () => {
+      if (!id) {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        return;
+      }
+      document
+        .getElementById(id)
+        ?.scrollIntoView({ behavior: "smooth", block: "start" });
+    };
+
+    tryScroll();
+    [150, 450, 900].forEach((delay) =>
+      timers.push(window.setTimeout(tryScroll, delay)),
+    );
+
+    return () => timers.forEach((timer) => window.clearTimeout(timer));
+  }, [pathname, hash]);
+
+  return null;
+}
+
 // Offline support (production builds only): cache the app shell. Wrapped in
 // try/catch so sandboxed preview iframes never log errors.
 if (import.meta.env.PROD && "serviceWorker" in navigator) {
@@ -136,6 +176,7 @@ createRoot(document.getElementById("root")!).render(
         <ConvexAuthProvider client={convex}>
           <BrowserRouter>
             <RouteSyncer />
+            <ScrollManager />
             <Suspense fallback={<RouteLoading />}>
               <Routes>
                 <Route path="/" element={<Landing />} />

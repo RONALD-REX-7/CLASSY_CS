@@ -50,6 +50,7 @@ function formatPoint(v: number): string {
  *     — plus an optional student name / semester line
  *   · summary block — GPA card + rating chip, and a 2×2 stats grid
  *   · subjects table  — S.NO / SUBJECT / CREDITS / GRADE / POINT / WEIGHTED
+ *     — with a bold TOTAL footer row (Σ credits · Σ weighted points)
  *   · grade scale reference table
  *   · footer with version, privacy note and page numbers
  */
@@ -193,6 +194,17 @@ export function exportGpaPdf(
       String(GRADE_POINTS[subject.grade]),
       formatPoint(subjectPoints(subject)),
     ]),
+    // Bold TOTAL footer row — sums the credits and weighted columns.
+    foot: [
+      [
+        { content: "TOTAL", colSpan: 2, styles: { halign: "left" } },
+        formatPoint(totals.credits),
+        "",
+        "",
+        formatPoint(totals.weighted),
+      ],
+    ],
+    showFoot: "lastPage",
     theme: "grid",
     styles: {
       font: "helvetica",
@@ -209,14 +221,22 @@ export function exportGpaPdf(
       fontStyle: "bold",
       fontSize: 9,
     },
+    footStyles: {
+      fillColor: TINT,
+      textColor: INK,
+      fontStyle: "bold",
+      fontSize: 9,
+      lineColor: LINE,
+      lineWidth: 0.2,
+    },
     alternateRowStyles: { fillColor: STRIPE },
     columnStyles: {
       0: { cellWidth: 14, halign: "center" },
       1: { fontStyle: "bold" },
-      2: { halign: "center" },
-      3: { halign: "center", fontStyle: "bold" },
-      4: { halign: "center" },
-      5: { halign: "center", fontStyle: "bold" },
+      2: { cellWidth: 18, halign: "center" },
+      3: { cellWidth: 16, halign: "center", fontStyle: "bold" },
+      4: { cellWidth: 24, halign: "center" },
+      5: { cellWidth: 26, halign: "center", fontStyle: "bold" },
     },
     didDrawPage: (data) => {
       const footerY = pageHeight - 11;

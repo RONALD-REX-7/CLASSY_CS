@@ -23,7 +23,7 @@ const NAV_LINKS = [
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const { pathname } = useLocation();
+  const { pathname, hash } = useLocation();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10);
@@ -32,8 +32,8 @@ export function Navbar() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Close the mobile menu whenever the route changes.
-  useEffect(() => setMenuOpen(false), [pathname]);
+  // Close the mobile menu whenever the route or hash changes.
+  useEffect(() => setMenuOpen(false), [pathname, hash]);
 
   return (
     <header
