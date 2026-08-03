@@ -77,8 +77,8 @@ function SectionHeading({
 /* ------------------------------------------------------------------ */
 
 const MOCK_SUBJECTS = [
-  { name: "Digital Signal Processing", credits: "4 CR", grade: "A+" as const, pts: 36 },
-  { name: "Signals & Systems", credits: "3 CR", grade: "B+" as const, pts: 21 },
+  { name: "Digital Signal Processing", credits: "4 CR", grade: "A+" as const },
+  { name: "Signals & Systems", credits: "3 CR", grade: "B+" as const },
 ];
 
 function HeroPanel() {
@@ -129,9 +129,6 @@ function HeroPanel() {
                 {row.credits}
               </span>
               <GradeChip grade={row.grade} className="h-6 min-w-8 px-2 text-xs" />
-              <span className="w-10 text-right text-[11px] font-bold tabular-nums text-muted-foreground">
-                {row.pts} pts
-              </span>
             </div>
           ))}
         </div>
@@ -378,7 +375,7 @@ export default function Landing() {
               <div className="glass-inset mt-6 rounded-2xl p-4">
                 <p className="text-xs font-semibold text-muted-foreground">Worked example</p>
                 <p className="mt-2 text-sm font-medium">
-                  (4 cr × 9) + (3 cr × 7) + (4 cr × 10) = 97 pts
+                  (4 cr × 9) + (3 cr × 7) + (4 cr × 10) = 97
                 </p>
                 <p className="mt-1 text-sm font-medium">
                   97 ÷ 11 credits = <span className="font-display font-bold text-indigo-600 dark:text-indigo-300">8.82 GPA</span>
@@ -471,6 +468,69 @@ export default function Landing() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-60px" }}
                 transition={{ delay: i * 0.12, duration: 0.5, ease: EASE }}
+                className="glass relative rounded-3xl p-6"
+              >
+                <span className="font-display text-4xl font-extrabold text-indigo-500/25 dark:text-indigo-300/20">
+                  {item.step}
+                </span>
+                <h3 className="mt-4 font-display text-lg font-bold tracking-tight">
+                  {item.title}
+                </h3>
+                <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                  {item.body}
+                </p>
+                {i < STEPS.length - 1 && (
+                  <ArrowRight className="absolute -right-4 top-1/2 hidden size-6 -translate-y-1/2 text-indigo-400/60 md:block" />
+                )}
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
 
+      {/* ========================== CTA ============================== */}
+      <section className="py-16 lg:py-24">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-80px" }}
+            transition={{ duration: 0.6, ease: EASE }}
+            className="btn-grad relative overflow-hidden rounded-[2rem] p-10 text-center sm:p-14"
+          >
+            {/* decorative rings */}
+            <div className="pointer-events-none absolute -right-16 -top-16 size-64 rounded-full border border-white/20" />
+            <div className="pointer-events-none absolute -right-8 -top-8 size-40 rounded-full border border-white/20" />
+            <div className="pointer-events-none absolute -bottom-20 -left-10 size-72 rounded-full bg-white/10 blur-2xl" />
 
-[FILE_TOO_LARGE]: The combined read_files output exceeded the 100,000 character hard limit. This file was truncated after 18,208 characters. Read it separately or use code_search for the relevant section.
+            <div className="relative">
+              <Logo size={44} className="mx-auto" />
+              <h2 className="mt-6 font-display text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
+                Ready to see your GPA?
+              </h2>
+              <p className="mx-auto mt-4 max-w-md text-sm leading-6 text-indigo-100 sm:text-base">
+                Open the calculator and add your first subject — your average
+                appears instantly. Free, private, and offline-friendly.
+              </p>
+              <Button
+                asChild
+                size="lg"
+                className="mt-8 h-12 rounded-full border border-white/40 bg-white px-8 text-base font-bold text-indigo-700 shadow-lg transition-transform hover:scale-105 active:scale-95"
+              >
+                <Link to="/calculator">
+                  Open the calculator
+                  <ArrowRight className="size-4" />
+                </Link>
+              </Button>
+              <p className="mt-4 text-xs font-medium text-indigo-100/90">
+                No sign-up · Free forever · Works offline
+              </p>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      <Footer />
+    </motion.div>
+  );
+}
