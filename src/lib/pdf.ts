@@ -2,7 +2,6 @@ import { APP_NAME, APP_VERSION, PDF_FILE_NAME } from "@/lib/constants";
 import {
   computeGpa,
   computeTotals,
-  formatCredits,
   getRating,
   GRADES,
   GRADE_POINTS,
@@ -42,17 +41,47 @@ function formatPoint(v: number): string {
   return Number.isInteger(v) ? String(v) : v.toFixed(1);
 }
 
+/** Shared page footer: hairline rule, version/privacy note, page number. */
+function drawPageFooter(doc: jsPDF, pageNumber: number): void {
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+  const margin = 14;
+  const footerY = pageHeight - 11;
+  doc.setDrawColor(...LINE);
+  doc.setLineWidth(0.3);
+  doc.line(margin, footerY, pageWidth - margin, footerY);
+  doc.setFontSize(7.5);
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(...MUTED);
+  doc.text(
+    `${APP_NAME} v${APP_VERSION} · local-first · data never leaves your device`,
+    margin,
+    footerY + 4.5,
+  );
+  doc.text(`Page ${pageNumber}`, pageWidth - margin, footerY + 4.5, {
+    align: "right",
+  });
+}
+
+/** Small uppercase section heading above each block. */
+function sectionTitle(doc: jsPDF, title: string, y: number): void {
+  doc.setFontSize(11);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(...INK);
+  doc.text(title, 14, y);
+}
+
 /**
  * Generate a structured, branded PDF report of the current grade sheet.
  *
  * Layout (academic-report style, inspired by institutional timetables):
  *   · branded header band (CLASSY_CS · GPA REPORT · generated date)
  *     — plus an optional student name / semester line
- *   · summary block — GPA card + rating chip, and a 2×2 stats grid
- *   · subjects table  — S.NO / SUBJECT / CREDITS / GRADE / POINT / WEIGHTED
- *     — with a bold TOTAL footer row (Σ credits · Σ weighted points)
- *   · grade scale reference table
- *   · footer with version, privacy note and page numbers
+ *   · "Semester summary" — GPA card + rating chip, and a 2×2 stats grid
+ *   · "Subject breakdown" table — S.NO / SUBJECT / CREDITS / GRADE /
+ *     GRADE POINT / WEIGHTED, right-aligned numerics and a TOTAL row
+ *   · "Grade scale reference" table (10-point)
+ *   · page footer with version, privacy note and page numbers
  */
 export function exportGpaPdf(
   subjects: Subject[],
@@ -111,9 +140,11 @@ export function exportGpaPdf(
     doc.text(profileLine, margin, 26.2);
   }
 
-  let y = 46;
+  /* --------------------- semester summary ------------------------ */
+  let y = 43;
+  sectionTitle(doc, "Semester summary", y);
+  y += 6;
 
-  /* ------------------------ summary block ------------------------ */
   const cardH = 36;
   const gap = 4;
   const leftW = (contentWidth - gap) * 0.42;
@@ -128,23 +159,23 @@ export function exportGpaPdf(
   doc.setFontSize(7.5);
   doc.setFont("helvetica", "bold");
   doc.setTextColor(...MUTED);
-  doc.text("CURRENT GPA", margin + 5, y + 8);
+  doc.text("CURRENT GPA", margin + 5, y + 7.5);
 
   doc.setFontSize(24);
   doc.setFont("helvetica", "bold");
   doc.setTextColor(...ratingRgb);
-  doc.text(`${gpa > 0 ? gpa.toFixed(2) : "—"} / 10`, margin + 5, y + 19);
+  doc.text(`${gpa > 0 ? gpa.toFixed(2) : "—"} / 10`, margin + 5, y + 18);
 
   // Rating chip
   const chipLabel = totals.count > 0 ? rating.label : "No data";
   doc.setFillColor(...ratingRgb);
-  doc.roundedRect(margin + 5, y + 23, 6 + chipLabel.length * 1.7 + 4, 6.5, 3.2, 3.2, "F");
+  doc.roundedRect(margin + 5, y + 22.5, 6 + chipLabel.length * 1.7 + 4, 6.5, 3.2, 3.2, "F");
   doc.setFontSize(8);
   doc.setFont("helvetica", "bold");
   doc.setTextColor(255, 255, 255);
-  doc.text(chipLabel, margin + 5 + 3.4, y + 27.6);
+  doc.text(chipLabel, margin + 5 + 3.4, y + 27.1);
 
-  // Stats grid (2 × 2)
+  // Stats grid (2 × 2) — label near the top, value vertically centered.
   const stats: { label: string; value: string }[] = [
     { label: "SUBJECTS", value: String(totals.count) },
     { label: "TOTAL CREDITS", value: formatPoint(totals.credits) },
@@ -167,20 +198,17 @@ export function exportGpaPdf(
     doc.setFontSize(7);
     doc.setFont("helvetica", "bold");
     doc.setTextColor(...MUTED);
-    doc.text(stat.label, x + 4, cy + 8);
+    doc.text(stat.label, x + 4, cy + 6.5);
     doc.setFontSize(13);
     doc.setFont("helvetica", "bold");
     doc.setTextColor(...INK);
-    doc.text(stat.value, x + 4, cy + 21);
+    doc.text(stat.value, x + 4, cy + 12.5);
   });
 
-  y += cardH + 12;
+  y += cardH + 14;
 
-  /* ------------------------ subjects table ----------------------- */
-  doc.setFontSize(11);
-  doc.setFont("helvetica", "bold");
-  doc.setTextColor(...INK);
-  doc.text("Subject breakdown", margin, y);
+  /* ----------------------- subject breakdown --------------------- */
+  sectionTitle(doc, "Subject breakdown", y);
 
   autoTable(doc, {
     startY: y + 4,
@@ -199,8 +227,8 @@ export function exportGpaPdf(
       [
         { content: "TOTAL", colSpan: 2, styles: { halign: "left" } },
         formatPoint(totals.credits),
-        "",
-        "",
+        "—",
+        "—",
         formatPoint(totals.weighted),
       ],
     ],
@@ -209,7 +237,7 @@ export function exportGpaPdf(
     styles: {
       font: "helvetica",
       fontSize: 9.5,
-      cellPadding: 2.6,
+      cellPadding: 3,
       textColor: INK,
       lineColor: LINE,
       lineWidth: 0.2,
@@ -231,47 +259,28 @@ export function exportGpaPdf(
     },
     alternateRowStyles: { fillColor: STRIPE },
     columnStyles: {
-      0: { cellWidth: 14, halign: "center" },
+      0: { cellWidth: 12, halign: "center" },
       1: { fontStyle: "bold" },
-      2: { cellWidth: 18, halign: "center" },
+      2: { cellWidth: 19, halign: "right" },
       3: { cellWidth: 16, halign: "center", fontStyle: "bold" },
-      4: { cellWidth: 24, halign: "center" },
-      5: { cellWidth: 26, halign: "center", fontStyle: "bold" },
+      4: { cellWidth: 25, halign: "center" },
+      5: { cellWidth: 29, halign: "right", fontStyle: "bold" },
     },
-    didDrawPage: (data) => {
-      const footerY = pageHeight - 11;
-      doc.setDrawColor(...LINE);
-      doc.setLineWidth(0.3);
-      doc.line(margin, footerY, pageWidth - margin, footerY);
-      doc.setFontSize(7.5);
-      doc.setFont("helvetica", "normal");
-      doc.setTextColor(...MUTED);
-      doc.text(
-        `${APP_NAME} v${APP_VERSION} · local-first · data never leaves your device`,
-        margin,
-        footerY + 4.5,
-      );
-      doc.text(`Page ${data.pageNumber}`, pageWidth - margin, footerY + 4.5, {
-        align: "right",
-      });
-    },
+    didDrawPage: (data) => drawPageFooter(doc, data.pageNumber),
   });
 
-  /* ------------------- grade scale reference --------------------- */
+  /* --------------------- grade scale reference ------------------- */
   const afterTable =
     (doc as unknown as { lastAutoTable?: { finalY: number } }).lastAutoTable
       ?.finalY ?? y + 10;
 
-  let scaleY = afterTable + 12;
-  if (scaleY + 34 > pageHeight - 16) {
+  let scaleY = afterTable + 14;
+  if (scaleY + 36 > pageHeight - 16) {
     doc.addPage();
-    scaleY = 20;
+    scaleY = 24;
   }
 
-  doc.setFontSize(11);
-  doc.setFont("helvetica", "bold");
-  doc.setTextColor(...INK);
-  doc.text("Grade scale reference (10-point)", margin, scaleY);
+  sectionTitle(doc, "Grade scale reference (10-point)", scaleY);
 
   autoTable(doc, {
     startY: scaleY + 4,
@@ -281,8 +290,8 @@ export function exportGpaPdf(
     theme: "grid",
     styles: {
       font: "helvetica",
-      fontSize: 9,
-      cellPadding: 3,
+      fontSize: 9.5,
+      cellPadding: 3.2,
       halign: "center",
       textColor: INK,
       lineColor: LINE,
@@ -295,26 +304,10 @@ export function exportGpaPdf(
       fontSize: 9.5,
     },
     alternateRowStyles: { fillColor: STRIPE },
-    didDrawPage: (data) => {
-      const footerY = pageHeight - 11;
-      doc.setDrawColor(...LINE);
-      doc.setLineWidth(0.3);
-      doc.line(margin, footerY, pageWidth - margin, footerY);
-      doc.setFontSize(7.5);
-      doc.setFont("helvetica", "normal");
-      doc.setTextColor(...MUTED);
-      doc.text(
-        `${APP_NAME} v${APP_VERSION} · local-first · data never leaves your device`,
-        margin,
-        footerY + 4.5,
-      );
-      doc.text(`Page ${data.pageNumber}`, pageWidth - margin, footerY + 4.5, {
-        align: "right",
-      });
-    },
+    didDrawPage: (data) => drawPageFooter(doc, data.pageNumber),
   });
 
-  /* --------------------------- footer ---------------------------- */
+  /* ---------------------------- footer --------------------------- */
   const finalY =
     (doc as unknown as { lastAutoTable?: { finalY: number } }).lastAutoTable
       ?.finalY ?? pageHeight - 20;
