@@ -1,17 +1,1 @@
-{
-  "name": "CLASSY_CS — GPA Calculator",
-  "short_name": "CLASSY_CS",
-  "description": "A beautiful, local-first GPA calculator with structured PDF export.",
-  "start_url": "/",
-  "display": "standalone",
-  "background_color": "#eef2ff",
-  "theme_color": "#4f46e5",
-  "icons": [
-    {
-      "src": "/logo.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
-    }
-  ]
-}
+[FILE_TOO_LARGE]: The combined read_files output exceeded the 100,000 character hard limit. This file was truncated after 0 characters. Read it separately or use code_search for the relevant section.
