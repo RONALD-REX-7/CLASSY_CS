@@ -169,51 +169,6 @@ const FEATURES = [
   {
     icon: FileText,
     title: "Structured PDF reports",
-    body: "Export a branded, structured PDF of your grade sheet — perfect for records or sharing.",
-    tile: "bg-violet-500/12 text-violet-600 dark:text-violet-300",
-  },
-  {
-    icon: ClipboardCopy,
-    title: "Copy GPA in a click",
-    body: "Share your average anywhere — copied to your clipboard with one tap.",
-    tile: "bg-teal-500/12 text-teal-600 dark:text-teal-300",
-  },
-  {
-    icon: Gauge,
-    title: "Progress ring",
-    body: "An animated circular gauge shows exactly where you stand at a glance.",
-    tile: "bg-rose-500/12 text-rose-600 dark:text-rose-300",
-  },
-  {
-    icon: SunMoon,
-    title: "Dark & light modes",
-    body: "A luminous light theme and a calm dark theme — smoothly cross-faded.",
-    tile: "bg-indigo-500/12 text-indigo-600 dark:text-indigo-300",
-  },
-];
+    body: "Export a branded, structured PDF of
 
-const STEPS = [
-  {
-    step: "01",
-    title: "Add your subjects",
-    body: "Name each subject, set its credits, and pick a grade from the dropdown. No sign-up, no setup.",
-  },
-  {
-    step: "02",
-    title: "Watch it calculate",
-    body: "GPA, weighted points and totals update live as you type — the ring fills and stats count up.",
-  },
-  {
-    step: "03",
-    title: "Save, share, export",
-    body: "Everything autosaves locally. Export a structured PDF report, share your GPA, or print anytime.",
-  },
-];
-
-/** Rating bands with display ranges (RATINGS is ordered high → low). */
-const RATING_BANDS = RATINGS.map((rating, i) => {
-  const bottom = rating.min;
-  const top = i === 0 ? 10 : RATINGS[i - 1].min - 0.1;
-  const fmt = 
-
-[FILE_TOO_LARGE]: The combined read_files output exceeded the 100,000 character hard limit. This file was truncated after 7,427 characters. Read it separately or use code_search for the relevant section.
+[FILE_TOO_LARGE]: The combined read_files output exceeded the 100,000 character hard limit. This file was truncated after 5,941 characters. Read it separately or use code_search for the relevant section.
