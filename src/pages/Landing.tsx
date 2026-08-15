@@ -262,6 +262,278 @@ export default function Landing() {
                 size="lg"
                 className="btn-grad h-12 w-full whitespace-nowrap rounded-full border-0 px-7 text-base text-white sm:w-auto"
               >
-      
+                <Link to="/calculator">
+                  Start calculating
+                  <ArrowRight className="size-4" />
+                </Link>
+              </Button>
+              <Button
+                asChild
+                size="lg"
+                variant="outline"
+                className="glass-soft h-12 w-full whitespace-nowrap rounded-full border-0 px-7 text-base sm:w-auto"
+              >
+                <Link to="/#scale">See the grade scale</Link>
+              </Button>
+            </motion.div>
 
-[FILE_TOO_LARGE]: The combined read_files output exceeded the 100,000 character hard limit. This file was truncated after 9,402 characters. Read it separately or use code_search for the relevant section.
+            <motion.ul
+              {...fadeUp(0.28)}
+              className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-2 text-xs font-semibold text-muted-foreground"
+            >
+              <li className="flex items-center gap-1.5">
+                <WifiOff className="size-3.5 text-sky-500" /> Works offline
+              </li>
+              <li className="flex items-center gap-1.5">
+                <ShieldCheck className="size-3.5 text-emerald-500" /> Data stays on your device
+              </li>
+              <li className="flex items-center gap-1.5">
+                <Zap className="size-3.5 text-amber-500" /> Instant updates
+              </li>
+            </motion.ul>
+          </div>
+
+          {/* Mock product panel */}
+          <div className="mx-auto w-full max-w-[30.5rem] lg:max-w-none">
+            <HeroPanel />
+          </div>
+        </div>
+      </section>
+
+      {/* ========================== FEATURES ========================== */}
+      <section id="features" className="scroll-mt-24 py-14 lg:py-24">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+          <SectionHeading
+            eyebrow="Featured by SPIRIT"
+            title={
+              <>
+                Just A <span className="text-gradient">CGPA Calculator.</span>
+              </>
+            }
+          />
+
+          <div className="mt-10 grid gap-4 sm:mt-12 sm:grid-cols-2 lg:grid-cols-4">
+            {FEATURES.map((feature, i) => (
+              <motion.div
+                key={feature.title}
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-40px" }}
+                transition={{ delay: (i % 4) * 0.07, duration: 0.5, ease: EASE }}
+                whileHover={{ y: -5 }}
+                className="glass group rounded-2xl p-5 transition-shadow duration-300 hover:shadow-[0_20px_48px_-20px_rgba(58,84,180,0.4)]"
+              >
+                <span
+                  className={`grid size-11 place-items-center rounded-xl border border-white/50 transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3 dark:border-white/10 ${feature.tile}`}
+                >
+                  <feature.icon className="size-5" />
+                </span>
+                <h3 className="mt-4 font-display text-base font-bold tracking-tight">
+                  {feature.title}
+                </h3>
+                <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                  {feature.body}
+                </p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ======================== GRADE SCALE ========================= */}
+      <section id="scale" className="scroll-mt-24 py-14 lg:py-24">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+          <SectionHeading
+            eyebrow="Grade scale"
+            title={
+              <>
+                The 10-point scale, <span className="text-gradient">mapped clearly</span>
+              </>
+            }
+            sub="Every grade maps to a point value. Your GPA is the credit-weighted average of them all."
+          />
+
+          <div className="mt-10 grid gap-6 sm:mt-12 lg:grid-cols-[1fr_1.2fr] lg:items-start">
+            {/* Formula card */}
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, margin: "-60px" }}
+              transition={{ duration: 0.55, ease: EASE }}
+              className="glass rounded-3xl p-7"
+              id="formula"
+            >
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground">
+                How it's computed
+              </p>
+              <p className="mt-5 font-display text-xl font-bold leading-relaxed tracking-tight sm:text-2xl">
+                GPA = <span className="text-gradient">Σ (Credit × Grade point)</span>{" "}
+                <span className="font-sans">÷</span> Σ (Credits)
+              </p>
+              <p className="mt-4 text-sm leading-6 text-muted-foreground">
+                Each subject's grade point is multiplied by its credits, all
+                weighted points are summed, then divided by the total credits.
+                A subject worth 4 credits counts for more than one worth 2.
+              </p>
+              <div className="glass-inset mt-6 rounded-2xl p-4">
+                <p className="text-xs font-semibold text-muted-foreground">Worked example</p>
+                <p className="mt-2 text-sm font-medium">
+                  (4 cr × 9) + (3 cr × 7) + (4 cr × 10) = 97
+                </p>
+                <p className="mt-1 text-sm font-medium">
+                  97 ÷ 11 credits = <span className="font-display font-bold text-indigo-600 dark:text-indigo-300">8.82 GPA</span>
+                </p>
+              </div>
+            </motion.div>
+
+            {/* Grade grid */}
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+              {GRADES.map((grade, i) => (
+                <motion.div
+                  key={grade}
+                  initial={{ opacity: 0, y: 18 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-40px" }}
+                  transition={{ delay: i * 0.05, duration: 0.45, ease: EASE }}
+                  whileHover={{ y: -4 }}
+                  className="glass flex flex-col items-center gap-2 rounded-2xl p-4"
+                >
+                  <GradeChip grade={grade} />
+                  <p className="font-display text-lg font-bold tabular-nums">
+                    {GRADE_POINTS[grade]}
+                  </p>
+                  <p className="-mt-1 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                    points
+                  </p>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+
+          {/* Performance rating bands */}
+          <motion.div
+            initial={{ opacity: 0, y: 18 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-40px" }}
+            transition={{ duration: 0.55, ease: EASE }}
+            className="mt-10"
+          >
+            <p className="text-center text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground">
+              How your GPA is rated
+            </p>
+            <div className="mt-4 grid gap-3 sm:grid-cols-5">
+              {RATING_BANDS.map((band, i) => (
+                <motion.div
+                  key={band.key}
+                  initial={{ opacity: 0, y: 14 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-20px" }}
+                  transition={{ delay: i * 0.06, duration: 0.4, ease: EASE }}
+                  whileHover={{ y: -3 }}
+                  className="glass rounded-2xl p-4 text-center"
+                >
+                  <span
+                    className="mx-auto block size-3 rounded-full"
+                    style={{ background: band.ringFrom, boxShadow: `0 0 14px ${band.glow}` }}
+                    aria-hidden="true"
+                  />
+                  <p className={cn("mt-2.5 font-display text-sm font-bold", band.text)}>
+                    {band.label}
+                  </p>
+                  <p className="mt-0.5 text-xs font-semibold tabular-nums text-muted-foreground">
+                    {band.range}
+                  </p>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ======================= HOW IT WORKS ========================= */}
+      <section id="how" className="scroll-mt-24 py-14 lg:py-24">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+          <SectionHeading
+            eyebrow="How it works"
+            title={
+              <>
+                Three steps to <span className="text-gradient">clarity</span>
+              </>
+            }
+            sub="No accounts, no installs — just open, add, and go."
+          />
+
+          <div className="mt-10 grid gap-5 sm:mt-12 md:grid-cols-3">
+            {STEPS.map((item, i) => (
+              <motion.div
+                key={item.step}
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-60px" }}
+                transition={{ delay: i * 0.12, duration: 0.5, ease: EASE }}
+                className="glass relative rounded-3xl p-6"
+              >
+                <span className="font-display text-4xl font-extrabold text-indigo-500/25 dark:text-indigo-300/20">
+                  {item.step}
+                </span>
+                <h3 className="mt-4 font-display text-lg font-bold tracking-tight">
+                  {item.title}
+                </h3>
+                <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                  {item.body}
+                </p>
+                {i < STEPS.length - 1 && (
+                  <ArrowRight className="absolute -right-4 top-1/2 hidden size-6 -translate-y-1/2 text-indigo-400/60 md:block" />
+                )}
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ========================== CTA ============================== */}
+      <section className="py-14 lg:py-24">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-80px" }}
+            transition={{ duration: 0.6, ease: EASE }}
+            className="btn-grad relative overflow-hidden rounded-[2rem] p-8 text-center sm:p-14"
+          >
+            {/* decorative rings */}
+            <div className="pointer-events-none absolute -right-16 -top-16 size-64 rounded-full border border-white/20" />
+            <div className="pointer-events-none absolute -right-8 -top-8 size-40 rounded-full border border-white/20" />
+            <div className="pointer-events-none absolute -bottom-20 -left-10 size-72 rounded-full bg-white/10 blur-2xl" />
+
+            <div className="relative">
+              <Logo size={44} className="mx-auto" />
+              <h2 className="mt-6 font-display text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
+                Ready to see your GPA?
+              </h2>
+              <p className="mx-auto mt-4 max-w-md text-sm leading-6 text-indigo-100 sm:text-base">
+                Open the calculator and add your first subject — your average
+                appears instantly. Free, private, and offline-friendly.
+              </p>
+              <Button
+                asChild
+                size="lg"
+                className="mt-8 h-12 w-full rounded-full border border-white/40 bg-white px-8 text-base font-bold text-indigo-700 shadow-lg transition-transform hover:scale-105 active:scale-95 sm:w-auto"
+              >
+                <Link to="/calculator">
+                  Open the calculator
+                  <ArrowRight className="size-4" />
+                </Link>
+              </Button>
+              <p className="mt-4 text-xs font-medium text-indigo-100/90">
+                No sign-up · Free forever · Works offline
+              </p>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      <Footer />
+    </motion.div>
+  );
+}
