@@ -85,7 +85,17 @@ class RootErrorBoundary extends React.Component<
   }
 }
 
-const convex = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL as string);
+/* ------------------------------------------------------------------
+ * Convex is optional. This product is 100% local-first (no backend, no
+ * auth), and `new ConvexReactClient(undefined)` throws at boot with
+ * "No address provided to ConvexReactClient". The client + auth provider
+ * are therefore only wired up when a deployment actually supplies
+ * VITE_CONVEX_URL (e.g. the Freebuff platform). On plain static hosts
+ * like Vercel/Netlify the app boots without Convex and works fully
+ * offline — no env vars required.
+ * ------------------------------------------------------------------ */
+const convexUrl = import.meta.env.VITE_CONVEX_URL as string | undefined;
+const convex = convexUrl ? new ConvexReactClient(convexUrl) : null;
 
 function RouteSyncer() {
   const location = useLocation();
@@ -160,40 +170,48 @@ if (import.meta.env.PROD && "serviceWorker" in navigator) {
   });
 }
 
+/* The full app shell (theme → router → routes → toasts). */
+const app = (
+  <ThemeProvider
+    attribute="class"
+    defaultTheme="light"
+    enableSystem={false}
+    storageKey="classycs-theme"
+  >
+    <BrowserRouter>
+      <RouteSyncer />
+      <ScrollManager />
+      <Suspense fallback={<RouteLoading />}>
+        <Routes>
+          <Route path="/" element={<Landing />} />
+          <Route path="/calculator" element={<Calculator />} />
+          <Route
+            path="/auth"
+            element={<AuthPage redirectAfterAuth="/calculator" />}
+          />
+          {/* Legacy protected dashboard → the calculator (frontend-only product) */}
+          <Route path="/dashboard" element={<Navigate to="/calculator" replace />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </Suspense>
+    </BrowserRouter>
+    <Toaster />
+  </ThemeProvider>
+);
+
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <RootErrorBoundary>
       <ToolbarErrorBoundary>
         <VlyToolbar />
       </ToolbarErrorBoundary>
-      {/* CLASSY_CS theme — light glassmorphism by default, persisted to localStorage */}
-      <ThemeProvider
-        attribute="class"
-        defaultTheme="light"
-        enableSystem={false}
-        storageKey="classycs-theme"
-      >
-        <ConvexAuthProvider client={convex}>
-          <BrowserRouter>
-            <RouteSyncer />
-            <ScrollManager />
-            <Suspense fallback={<RouteLoading />}>
-              <Routes>
-                <Route path="/" element={<Landing />} />
-                <Route path="/calculator" element={<Calculator />} />
-                <Route
-                  path="/auth"
-                  element={<AuthPage redirectAfterAuth="/calculator" />}
-                />
-                {/* Legacy protected dashboard → the calculator (frontend-only product) */}
-                <Route path="/dashboard" element={<Navigate to="/calculator" replace />} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </Suspense>
-          </BrowserRouter>
-          <Toaster />
-        </ConvexAuthProvider>
-      </ThemeProvider>
+      {/* Convex auth provider only when a backend URL is configured — the
+          app runs fine without it on static hosts. */}
+      {convex ? (
+        <ConvexAuthProvider client={convex}>{app}</ConvexAuthProvider>
+      ) : (
+        app
+      )}
     </RootErrorBoundary>
   </StrictMode>,
 );
