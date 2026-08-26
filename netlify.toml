@@ -1,0 +1,10 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+# SPA fallback — every route serves the app shell; assets still resolve to
+# real files because Netlify matches them before redirects.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
