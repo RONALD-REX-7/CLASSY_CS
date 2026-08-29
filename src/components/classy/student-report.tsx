@@ -29,7 +29,7 @@ import {
   FileText,
   Shield,
 } from "lucide-react";
-import type { StudentProfile, AcademicResult } from "@/types";
+import type { StudentProfile } from "@/types";
 import type { SchoolSubject } from "@/types/school";
 import type { TargetLadder, AdmissionReadiness, CollegeRecommendation } from "@/types/college";
 

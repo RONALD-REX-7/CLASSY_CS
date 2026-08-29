@@ -72,7 +72,7 @@ import type {
   CutoffExtended,
   CollegeExtended,
 } from "@/types/college";
-import type { StudentProfile, AcademicResult } from "@/types";
+import type { StudentProfile } from "@/types";
 import {
   GraduationCap,
   Target,
