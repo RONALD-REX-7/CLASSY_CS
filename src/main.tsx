@@ -6,7 +6,7 @@ import { ConvexReactClient } from "convex/react";
 import { ThemeProvider } from "next-themes";
 import React, { StrictMode, Suspense, lazy, useEffect } from "react";
 import { createRoot } from "react-dom/client";
-import { BrowserRouter, Navigate, Route, Routes, useLocation } from "react-router";
+import { BrowserRouter, Route, Routes, useLocation } from "react-router";
 import "./index.css";
 
 // Lazy load route components for better code splitting
@@ -14,6 +14,8 @@ const Landing = lazy(() => import("./pages/Landing.tsx"));
 const Calculator = lazy(() => import("./pages/Calculator.tsx"));
 const AuthPage = lazy(() => import("./pages/Auth.tsx"));
 const NotFound = lazy(() => import("./pages/NotFound.tsx"));
+const DashboardPage = lazy(() => import("./pages/Dashboard.tsx"));
+const SchoolPage = lazy(() => import("./pages/School.tsx"));
 
 /** Branded fallback shown while a route chunk is being fetched. */
 function RouteLoading() {
@@ -189,8 +191,9 @@ const app = (
             path="/auth"
             element={<AuthPage redirectAfterAuth="/calculator" />}
           />
-          {/* Legacy protected dashboard → the calculator (frontend-only product) */}
-          <Route path="/dashboard" element={<Navigate to="/calculator" replace />} />
+          {/* CLASSY modules */}
+          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/school" element={<SchoolPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>
