@@ -58,7 +58,6 @@ import {
   compareScenarios,
   generateActionPlan,
 } from "@/lib/admissions/college/recommendation";
-import { generateRecommendations } from "@/lib/admissions/college/recommendation";
 import type { SchoolSubject } from "@/types/school";
 import type {
   TargetLadder,
