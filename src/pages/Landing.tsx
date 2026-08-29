@@ -239,7 +239,7 @@ export default function Landing() {
             <motion.div {...fadeUp(0.05)}>
               <span className="glass-soft inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-xs font-semibold text-muted-foreground">
                 <Sparkles className="size-3.5 text-indigo-500" />
-                V11 · Local · No login/sign-up
+                Academic & Admission Intelligence · Local · No sign-up
               </span>
             </motion.div>
 
@@ -247,9 +247,9 @@ export default function Landing() {
               {...fadeUp(0.12)}
               className="mt-5 font-display text-[2.1rem] font-extrabold leading-[1.12] tracking-tight sm:text-5xl sm:leading-[1.08] lg:text-6xl"
             >
-              Your GPA,
+              Your academic
               <br />
-              <span className="text-gradient">beautifully calculated.</span>
+              <span className="text-gradient">intelligence platform.</span>
             </motion.h1>
 
             {/* CTAs — full-width, thumb-friendly on mobile; inline on desktop */}
@@ -262,8 +262,8 @@ export default function Landing() {
                 size="lg"
                 className="btn-grad h-12 w-full whitespace-nowrap rounded-full border-0 px-7 text-base text-white sm:w-auto"
               >
-                <Link to="/calculator">
-                  Start calculating
+                <Link to="/school">
+                  Explore School
                   <ArrowRight className="size-4" />
                 </Link>
               </Button>
@@ -273,7 +273,7 @@ export default function Landing() {
                 variant="outline"
                 className="glass-soft h-12 w-full whitespace-nowrap rounded-full border-0 px-7 text-base sm:w-auto"
               >
-                <Link to="/#scale">See the grade scale</Link>
+                <Link to="/calculator">College GPA</Link>
               </Button>
             </motion.div>
 

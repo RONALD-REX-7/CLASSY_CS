@@ -186,6 +186,7 @@ interface AddSubjectFormProps {
 export function AddSubjectForm({ onAdd }: AddSubjectFormProps) {
   const [name, setName] = useState("");
   const [maxMarks, setMaxMarks] = useState(100);
+  const [obtainedMarks, setObtainedMarks] = useState(0);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -195,10 +196,11 @@ export function AddSubjectForm({ onAdd }: AddSubjectFormProps) {
       name: name.trim(),
       category: "core",
       maxMarks,
-      obtainedMarks: 0,
+      obtainedMarks,
     });
     setName("");
     setMaxMarks(100);
+    setObtainedMarks(0);
   };
 
   return (
@@ -212,7 +214,7 @@ export function AddSubjectForm({ onAdd }: AddSubjectFormProps) {
           className="h-9 text-sm"
         />
       </div>
-      <div className="w-24">
+      <div className="w-20">
         <label className="mb-1 block text-xs font-medium text-muted-foreground">Max</label>
         <Input
           type="number"
@@ -220,6 +222,16 @@ export function AddSubjectForm({ onAdd }: AddSubjectFormProps) {
           onChange={(e) => setMaxMarks(Number(e.target.value))}
           className="h-9 text-sm"
           min={1}
+        />
+      </div>
+      <div className="w-20">
+        <label className="mb-1 block text-xs font-medium text-muted-foreground">Obtained</label>
+        <Input
+          type="number"
+          value={obtainedMarks}
+          onChange={(e) => setObtainedMarks(Number(e.target.value))}
+          className="h-9 text-sm"
+          min={0}
         />
       </div>
       <Button type="submit" size="sm" className="btn-grad border-0 text-white cursor-pointer">

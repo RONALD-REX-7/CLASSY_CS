@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router";
 
 const NAV_LINKS = [
+  { label: "School", href: "/school", section: null },
   { label: "Calculator", href: "/calculator", section: null },
   { label: "Features", href: "/#features", section: "features" },
   { label: "Grade scale", href: "/#scale", section: "scale" },
