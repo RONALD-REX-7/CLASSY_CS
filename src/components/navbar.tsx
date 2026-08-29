@@ -8,27 +8,22 @@ import { ArrowRight, Menu, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router";
 
+/** Primary product navigation — reflects CLASSY's evolved structure. */
 const NAV_LINKS = [
-  { label: "School", href: "/school", section: null },
-  { label: "Calculator", href: "/calculator", section: null },
-  { label: "Features", href: "/#features", section: "features" },
-  { label: "Grade scale", href: "/#scale", section: "scale" },
-  { label: "How it works", href: "/#how", section: "how" },
+  { label: "School", href: "/school" },
+  { label: "College", href: "/calculator" },
+  { label: "Admission", href: "/admission" },
+  { label: "Explore", href: "/explore" },
+  { label: "My Classy", href: "/dashboard" },
 ];
 
-/** Landing sections tracked for scroll-spy highlighting. */
-const SECTION_IDS = ["features", "scale", "how"] as const;
-
 /**
- * Sticky glass navbar shared by the landing page and the calculator.
- * Turns fully opaque-glass once the page is scrolled, collapses into an
- * animated menu on mobile, and highlights the landing section currently
- * in view (scroll-spy) plus the Calculator link while on /calculator.
+ * Sticky glass navbar shared by every CLASSY page.
+ * Turns opaque once scrolled, collapses into animated menu on mobile.
  */
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [activeSection, setActiveSection] = useState<string | null>(null);
   const { pathname } = useLocation();
 
   useEffect(() => {
@@ -38,36 +33,10 @@ export function Navbar() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Close the mobile menu when a nav link is chosen (event-driven).
   const closeMenu = () => setMenuOpen(false);
 
-  // Scroll-spy: highlight the landing section whose top is just below the
-  // sticky nav. Only runs on the landing page; off the landing page the
-  // highlight is hidden at render time (see isLinkActive), so no extra
-  // state sync is needed here.
-  useEffect(() => {
-    if (pathname !== "/") return;
-    const NAV_OFFSET = 150;
-    const update = () => {
-      let current: string | null = null;
-      for (const id of SECTION_IDS) {
-        const el = document.getElementById(id);
-        if (!el) continue;
-        const rect = el.getBoundingClientRect();
-        if (rect.top <= NAV_OFFSET && rect.bottom > NAV_OFFSET) {
-          current = id;
-          break;
-        }
-      }
-      setActiveSection(current);
-    };
-    update();
-    window.addEventListener("scroll", update, { passive: true });
-    return () => window.removeEventListener("scroll", update);
-  }, [pathname]);
-
-  const isLinkActive = (section: string | null) =>
-    section ? pathname === "/" && activeSection === section : pathname === "/calculator";
+  const isLinkActive = (href: string) =>
+    href === "/" ? pathname === "/" : pathname.startsWith(href);
 
   return (
     <header
@@ -88,7 +57,10 @@ export function Navbar() {
           className="group flex items-center gap-2.5 rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-ring"
           aria-label={`${APP_NAME} home`}
         >
-          <Logo size={32} className="transition-transform duration-300 group-hover:scale-105 group-hover:-rotate-3" />
+          <Logo
+            size={32}
+            className="transition-transform duration-300 group-hover:scale-105 group-hover:-rotate-3"
+          />
           <span className="font-display text-lg font-bold tracking-tight text-foreground">
             {APP_NAME}
           </span>
@@ -97,7 +69,7 @@ export function Navbar() {
         {/* Desktop links */}
         <div className="hidden items-center gap-1 md:flex">
           {NAV_LINKS.map((link) => {
-            const isActive = isLinkActive(link.section);
+            const isActive = isLinkActive(link.href);
             return (
               <Link
                 key={link.label}
@@ -119,9 +91,12 @@ export function Navbar() {
         {/* Right actions */}
         <div className="flex items-center gap-2">
           <ThemeToggle className="hidden sm:inline-flex" />
-          <Button asChild className="btn-grad hidden rounded-full border-0 text-white sm:inline-flex">
-            <Link to="/calculator" onClick={closeMenu}>
-              Open calculator
+          <Button
+            asChild
+            className="btn-grad hidden rounded-full border-0 text-white sm:inline-flex"
+          >
+            <Link to="/school" onClick={closeMenu}>
+              Get started
               <ArrowRight className="size-4" />
             </Link>
           </Button>
@@ -153,7 +128,7 @@ export function Navbar() {
           >
             <div className="mx-auto flex max-w-6xl flex-col gap-1 px-4 py-4">
               {NAV_LINKS.map((link) => {
-                const isActive = isLinkActive(link.section);
+                const isActive = isLinkActive(link.href);
                 return (
                   <Link
                     key={link.label}
@@ -172,9 +147,12 @@ export function Navbar() {
               })}
               <div className="mt-2 flex items-center justify-between gap-3 border-t border-foreground/10 pt-4">
                 <ThemeToggle />
-                <Button asChild className="btn-grad flex-1 rounded-full border-0 text-white">
-                  <Link to="/calculator" onClick={closeMenu}>
-                    Open calculator
+                <Button
+                  asChild
+                  className="btn-grad flex-1 rounded-full border-0 text-white"
+                >
+                  <Link to="/school" onClick={closeMenu}>
+                    Get started
                     <ArrowRight className="size-4" />
                   </Link>
                 </Button>

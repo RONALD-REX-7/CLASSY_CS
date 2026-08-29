@@ -16,6 +16,10 @@ const AuthPage = lazy(() => import("./pages/Auth.tsx"));
 const NotFound = lazy(() => import("./pages/NotFound.tsx"));
 const DashboardPage = lazy(() => import("./pages/Dashboard.tsx"));
 const SchoolPage = lazy(() => import("./pages/School.tsx"));
+const AdmissionPage = lazy(() => import("./pages/Admission.tsx"));
+const ExplorePage = lazy(() => import("./pages/Explore.tsx"));
+const MyClassyPage = lazy(() => import("./pages/MyClassy.tsx"));
+const CollegePage = lazy(() => import("./pages/College.tsx"));
 
 /** Branded fallback shown while a route chunk is being fetched. */
 function RouteLoading() {
@@ -194,6 +198,10 @@ const app = (
           {/* CLASSY modules */}
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/school" element={<SchoolPage />} />
+          <Route path="/admission" element={<AdmissionPage />} />
+          <Route path="/explore" element={<ExplorePage />} />
+          <Route path="/my-classy" element={<MyClassyPage />} />
+          <Route path="/college" element={<CollegePage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>

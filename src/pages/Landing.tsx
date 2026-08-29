@@ -11,15 +11,20 @@ import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import {
   ArrowRight,
+  BookOpen,
+  Calculator,
   ClipboardCopy,
   FileJson,
   FileText,
+  GraduationCap,
   Gauge,
   Layers,
+  Map,
   Save,
   ShieldCheck,
   Sparkles,
   SunMoon,
+  Target,
   WifiOff,
   Zap,
 } from "lucide-react";
@@ -73,7 +78,7 @@ function SectionHeading({
 }
 
 /* ------------------------------------------------------------------ */
-/* Hero mock panel — a live-looking product shot built from components  */
+/* Hero mock panel — a live-looking product shot from components        */
 /* ------------------------------------------------------------------ */
 
 const MOCK_SUBJECTS = [
@@ -84,14 +89,12 @@ const MOCK_SUBJECTS = [
 function HeroPanel() {
   return (
     <div className="relative">
-      {/* Main panel — slightly tighter padding on mobile so the ring is the focus */}
       <motion.div
         initial={{ opacity: 0, y: 26, rotate: -1 }}
         animate={{ opacity: 1, y: 0, rotate: 0 }}
         transition={{ delay: 0.25, duration: 0.7, ease: EASE }}
         className="glass rounded-3xl p-6 shadow-[0_30px_70px_-30px_rgba(58,84,180,0.4)] sm:p-8"
       >
-        {/* panel header — subtle, centered over the ring */}
         <div className="flex items-center justify-center gap-2">
           <span className="relative flex size-2.5">
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-70" />
@@ -102,12 +105,10 @@ function HeroPanel() {
           </p>
         </div>
 
-        {/* GPA ring — the focal point, perfectly centered */}
         <div className="mt-6 grid place-items-center">
           <GpaRing gpa={8.82} hasData size={150} strokeWidth={14} />
         </div>
 
-        {/* rating + compact stats */}
         <div className="mt-5 flex flex-col items-center gap-2">
           <RatingBadge gpa={8.82} hasData />
           <p className="text-xs font-medium tabular-nums text-muted-foreground">
@@ -115,7 +116,6 @@ function HeroPanel() {
           </p>
         </div>
 
-        {/* fake subject rows — compact and easy to scan */}
         <div className="mt-5 space-y-2">
           {MOCK_SUBJECTS.map((row) => (
             <div
@@ -141,6 +141,7 @@ function HeroPanel() {
 /* Page                                                                */
 /* ------------------------------------------------------------------ */
 
+/** Core product features — reuses the existing visual language. */
 const FEATURES = [
   {
     icon: Layers,
@@ -218,6 +219,16 @@ const RATING_BANDS = RATINGS.map((rating, i) => {
   return { ...rating, range: `${fmt(bottom)} – ${fmt(top)}` };
 });
 
+/** The flow: from marks → admission planning. */
+const ADMISSION_FLOW = [
+  { icon: BookOpen, label: "Your Marks", desc: "Enter board & exam marks" },
+  { icon: Target, label: "Eligibility", desc: "Check admission requirements" },
+  { icon: Map, label: "Pathways", desc: "Discover TNEA, JEE, NEET routes" },
+  { icon: GraduationCap, label: "College Targets", desc: "Safe / Target / Reach" },
+  { icon: Zap, label: "What-If", desc: "Simulate improved scores" },
+  { icon: FileText, label: "Action Plan", desc: "Know what to do next" },
+];
+
 export default function Landing() {
   return (
     <motion.div
@@ -231,15 +242,13 @@ export default function Landing() {
 
       {/* ============================ HERO ============================ */}
       <section className="relative overflow-hidden">
-        {/* Mobile: headline → CTAs → result card, stacked in one column.
-            Desktop: unchanged two-column layout. */}
         <div className="mx-auto grid max-w-6xl items-center gap-12 px-4 pb-16 pt-10 sm:px-6 lg:grid-cols-2 lg:gap-12 lg:pb-28 lg:pt-24">
           {/* Copy */}
           <div>
             <motion.div {...fadeUp(0.05)}>
               <span className="glass-soft inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-xs font-semibold text-muted-foreground">
                 <Sparkles className="size-3.5 text-indigo-500" />
-                Academic & Admission Intelligence · Local · No sign-up
+                CLASSY — Academic-to-Admission Intelligence
               </span>
             </motion.div>
 
@@ -247,14 +256,21 @@ export default function Landing() {
               {...fadeUp(0.12)}
               className="mt-5 font-display text-[2.1rem] font-extrabold leading-[1.12] tracking-tight sm:text-5xl sm:leading-[1.08] lg:text-6xl"
             >
-              Your academic
+              Understand your academics.
               <br />
-              <span className="text-gradient">intelligence platform.</span>
+              <span className="text-gradient">Plan your future.</span>
             </motion.h1>
 
-            {/* CTAs — full-width, thumb-friendly on mobile; inline on desktop */}
+            <motion.p
+              {...fadeUp(0.18)}
+              className="mt-4 max-w-lg text-sm leading-6 text-muted-foreground sm:text-base"
+            >
+              From marks to meaning, from scores to strategy. Calculate performance, check eligibility, discover realistic options, and plan your next step — all in one place.
+            </motion.p>
+
+            {/* Primary CTAs — School + College */}
             <motion.div
-              {...fadeUp(0.2)}
+              {...fadeUp(0.24)}
               className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4"
             >
               <Button
@@ -263,7 +279,8 @@ export default function Landing() {
                 className="btn-grad h-12 w-full whitespace-nowrap rounded-full border-0 px-7 text-base text-white sm:w-auto"
               >
                 <Link to="/school">
-                  Explore School
+                  <GraduationCap className="size-4" />
+                  School Student
                   <ArrowRight className="size-4" />
                 </Link>
               </Button>
@@ -273,12 +290,27 @@ export default function Landing() {
                 variant="outline"
                 className="glass-soft h-12 w-full whitespace-nowrap rounded-full border-0 px-7 text-base sm:w-auto"
               >
-                <Link to="/calculator">College GPA</Link>
+                <Link to="/calculator">
+                  <Calculator className="size-4" />
+                  College Student
+                </Link>
               </Button>
             </motion.div>
 
+            {/* Secondary CTA */}
+            <motion.div {...fadeUp(0.3)} className="mt-4">
+              <Link
+                to="/admission"
+                className="inline-flex items-center gap-2 text-sm font-semibold text-indigo-600 transition-colors hover:text-indigo-700 dark:text-indigo-300 dark:hover:text-indigo-200"
+              >
+                <Target className="size-4" />
+                Explore Admissions
+                <ArrowRight className="size-3.5" />
+              </Link>
+            </motion.div>
+
             <motion.ul
-              {...fadeUp(0.28)}
+              {...fadeUp(0.36)}
               className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-2 text-xs font-semibold text-muted-foreground"
             >
               <li className="flex items-center gap-1.5">
@@ -300,14 +332,184 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* =================== SCHOOL VS COLLEGE ======================== */}
+      <section id="choose" className="scroll-mt-24 py-14 lg:py-24">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+          <SectionHeading
+            eyebrow="Choose your path"
+            title={
+              <>
+                Built for <span className="text-gradient">school & college</span> students
+              </>
+            }
+          />
+
+          <div className="mt-10 grid gap-5 sm:mt-12 sm:grid-cols-2">
+            {/* School */}
+            <motion.div
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-60px" }}
+              transition={{ duration: 0.5, ease: EASE }}
+              whileHover={{ y: -5 }}
+              className="glass group rounded-3xl p-7 transition-shadow duration-300 hover:shadow-[0_20px_48px_-20px_rgba(58,84,180,0.4)]"
+            >
+              <span className="grid size-12 place-items-center rounded-xl bg-indigo-500/12 text-indigo-600 transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3 dark:text-indigo-300">
+                <GraduationCap className="size-6" />
+              </span>
+              <h3 className="mt-5 font-display text-xl font-bold tracking-tight">
+                School
+              </h3>
+              <p className="mt-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                Classes 10 – 12
+              </p>
+              <ul className="mt-4 space-y-2 text-sm leading-6 text-muted-foreground">
+                <li className="flex items-start gap-2">
+                  <span className="mt-1 block size-1.5 rounded-full bg-indigo-400" />
+                  Board-specific academic tracking (Tamil Nadu, CBSE, International)
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="mt-1 block size-1.5 rounded-full bg-indigo-400" />
+                  Strengths, weaknesses & percentage insights
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="mt-1 block size-1.5 rounded-full bg-indigo-400" />
+                  JEE, NEET, TNEA pathway awareness
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="mt-1 block size-1.5 rounded-full bg-indigo-400" />
+                  Admission planning for Class 12
+                </li>
+              </ul>
+              <Button
+                asChild
+                className="mt-6 h-11 rounded-full border-0 text-sm font-semibold"
+              >
+                <Link to="/school">
+                  Enter School
+                  <ArrowRight className="size-4" />
+                </Link>
+              </Button>
+            </motion.div>
+
+            {/* College */}
+            <motion.div
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-60px" }}
+              transition={{ duration: 0.5, delay: 0.08, ease: EASE }}
+              whileHover={{ y: -5 }}
+              className="glass group rounded-3xl p-7 transition-shadow duration-300 hover:shadow-[0_20px_48px_-20px_rgba(58,84,180,0.4)]"
+            >
+              <span className="grid size-12 place-items-center rounded-xl bg-emerald-500/12 text-emerald-600 transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3 dark:text-emerald-300">
+                <Calculator className="size-6" />
+              </span>
+              <h3 className="mt-5 font-display text-xl font-bold tracking-tight">
+                College
+              </h3>
+              <p className="mt-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                Undergraduate Students
+              </p>
+              <ul className="mt-4 space-y-2 text-sm leading-6 text-muted-foreground">
+                <li className="flex items-start gap-2">
+                  <span className="mt-1 block size-1.5 rounded-full bg-emerald-400" />
+                  GPA calculator with credit-weighted average
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="mt-1 block size-1.5 rounded-full bg-emerald-400" />
+                  CGPA across multiple semesters
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="mt-1 block size-1.5 rounded-full bg-emerald-400" />
+                  Live calculation, autosave, PDF export
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="mt-1 block size-1.5 rounded-full bg-emerald-400" />
+                  Performance rating & grade breakdown
+                </li>
+              </ul>
+              <Button
+                asChild
+                variant="outline"
+                className="glass-soft mt-6 h-11 rounded-full border-0 text-sm font-semibold"
+              >
+                <Link to="/calculator">
+                  Enter College
+                  <ArrowRight className="size-4" />
+                </Link>
+              </Button>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* ================== ADMISSION INTELLIGENCE ==================== */}
+      <section className="scroll-mt-24 py-14 lg:py-24">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+          <SectionHeading
+            eyebrow="Admission Intelligence"
+            title={
+              <>
+                From marks to <span className="text-gradient">admission</span>
+              </>
+            }
+            sub="Understand your eligibility, discover realistic college options, simulate improvement, and plan your next step."
+          />
+
+          <div className="mt-10 grid grid-cols-2 gap-4 sm:mt-12 sm:grid-cols-3 lg:grid-cols-6">
+            {ADMISSION_FLOW.map((step, i) => (
+              <motion.div
+                key={step.label}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-40px" }}
+                transition={{ delay: i * 0.08, duration: 0.5, ease: EASE }}
+                whileHover={{ y: -4 }}
+                className="glass group flex flex-col items-center gap-3 rounded-2xl p-5 text-center"
+              >
+                <span className="grid size-11 place-items-center rounded-xl bg-indigo-500/12 text-indigo-600 transition-transform duration-300 group-hover:scale-110 dark:text-indigo-300">
+                  <step.icon className="size-5" />
+                </span>
+                <div>
+                  <p className="text-sm font-bold">{step.label}</p>
+                  <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                    {step.desc}
+                  </p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 18 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-60px" }}
+            transition={{ delay: 0.3, duration: 0.5, ease: EASE }}
+            className="mt-8 text-center"
+          >
+            <Button
+              asChild
+              size="lg"
+              variant="outline"
+              className="glass-soft h-11 rounded-full border-0 px-7 text-sm font-semibold"
+            >
+              <Link to="/admission">
+                Explore Admissions
+                <ArrowRight className="size-4" />
+              </Link>
+            </Button>
+          </motion.div>
+        </div>
+      </section>
+
       {/* ========================== FEATURES ========================== */}
       <section id="features" className="scroll-mt-24 py-14 lg:py-24">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <SectionHeading
-            eyebrow="Featured by SPIRIT"
+            eyebrow="Why CLASSY"
             title={
               <>
-                Just A <span className="text-gradient">CGPA Calculator.</span>
+                Everything you need, <span className="text-gradient">nothing you don't</span>
               </>
             }
           />
@@ -509,22 +711,35 @@ export default function Landing() {
             <div className="relative">
               <Logo size={44} className="mx-auto" />
               <h2 className="mt-6 font-display text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
-                Ready to see your GPA?
+                Your academic journey, simplified.
               </h2>
               <p className="mx-auto mt-4 max-w-md text-sm leading-6 text-indigo-100 sm:text-base">
-                Open the calculator and add your first subject — your average
-                appears instantly. Free, private, and offline-friendly.
+                Whether you're in school preparing for board exams or in college tracking your GPA — Classy helps you understand your performance and plan your next step.
               </p>
-              <Button
-                asChild
-                size="lg"
-                className="mt-8 h-12 w-full rounded-full border border-white/40 bg-white px-8 text-base font-bold text-indigo-700 shadow-lg transition-transform hover:scale-105 active:scale-95 sm:w-auto"
-              >
-                <Link to="/calculator">
-                  Open the calculator
-                  <ArrowRight className="size-4" />
-                </Link>
-              </Button>
+              <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+                <Button
+                  asChild
+                  size="lg"
+                  className="h-12 w-full rounded-full border border-white/40 bg-white px-8 text-base font-bold text-indigo-700 shadow-lg transition-transform hover:scale-105 active:scale-95 sm:w-auto"
+                >
+                  <Link to="/school">
+                    <GraduationCap className="size-4" />
+                    Start as School Student
+                    <ArrowRight className="size-4" />
+                  </Link>
+                </Button>
+                <Button
+                  asChild
+                  size="lg"
+                  variant="outline"
+                  className="h-12 w-full rounded-full border border-white/30 bg-white/10 px-8 text-base font-bold text-white transition-transform hover:scale-105 hover:bg-white/20 active:scale-95 sm:w-auto"
+                >
+                  <Link to="/calculator">
+                    <Calculator className="size-4" />
+                    Start as College Student
+                  </Link>
+                </Button>
+              </div>
               <p className="mt-4 text-xs font-medium text-indigo-100/90">
                 No sign-up · Free forever · Works offline
               </p>
