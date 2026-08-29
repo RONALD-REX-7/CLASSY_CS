@@ -20,6 +20,9 @@ const AdmissionPage = lazy(() => import("./pages/Admission.tsx"));
 const ExplorePage = lazy(() => import("./pages/Explore.tsx"));
 const MyClassyPage = lazy(() => import("./pages/MyClassy.tsx"));
 const CollegePage = lazy(() => import("./pages/College.tsx"));
+const TNEAPlannerPage = lazy(() => import("./pages/admission/TNEAPlanner.tsx"));
+const JEEPlannerPage = lazy(() => import("./pages/admission/JEEPlanner.tsx"));
+const NEETPlannerPage = lazy(() => import("./pages/admission/NEETPlanner.tsx"));
 
 /** Branded fallback shown while a route chunk is being fetched. */
 function RouteLoading() {
@@ -202,6 +205,9 @@ const app = (
           <Route path="/explore" element={<ExplorePage />} />
           <Route path="/my-classy" element={<MyClassyPage />} />
           <Route path="/college" element={<CollegePage />} />
+          <Route path="/admission/tnea" element={<TNEAPlannerPage />} />
+          <Route path="/admission/jee" element={<JEEPlannerPage />} />
+          <Route path="/admission/neet" element={<NEETPlannerPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>

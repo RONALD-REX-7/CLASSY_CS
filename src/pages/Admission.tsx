@@ -34,7 +34,7 @@ const EXAMS = [
     description: "Calculate your TNEA score (M=100, P=50, C=50, Total=200), check eligibility for Tamil Nadu engineering colleges, and explore realistic college targets.",
     icon: Landmark,
     color: "bg-indigo-500/12 text-indigo-600 dark:text-indigo-300",
-    href: "/school",
+    href: "/admission/tnea",
     features: ["Score calculation", "Category handling", "College targets", "Cutoff analysis"],
   },
   {
@@ -44,7 +44,7 @@ const EXAMS = [
     description: "Track Paper 1 (B.E./B.Tech) and Paper 2 (B.Arch/B.Planning) scores, percentiles, and session data. JEE Advanced qualification check included.",
     icon: Compass,
     color: "bg-sky-500/12 text-sky-600 dark:text-sky-300",
-    href: "/school",
+    href: "/admission/jee",
     features: ["Paper 1 & 2", "Percentile tracking", "Session data", "Advanced qualification"],
   },
   {
@@ -54,7 +54,7 @@ const EXAMS = [
     description: "Understand IIT admission eligibility, top-20-percentile requirements, aggregate criteria, and Class XII board requirements.",
     icon: Award,
     color: "bg-amber-500/12 text-amber-600 dark:text-amber-300",
-    href: "/school",
+    href: "/admission/jee",
     features: ["IIT eligibility", "75% aggregate", "Top-20-percentile", "Board requirements"],
   },
   {
@@ -64,7 +64,7 @@ const EXAMS = [
     description: "Track Physics, Chemistry, Biology scores. Understand NEET qualification versus medical admission competitiveness.",
     icon: BookOpen,
     color: "bg-emerald-500/12 text-emerald-600 dark:text-emerald-300",
-    href: "/school",
+    href: "/admission/neet",
     features: ["Subject scores", "Qualification check", "Medical pathways", "Category rules"],
   },
 ];
