@@ -3,7 +3,6 @@
  * Reuses existing shadcn/ui components for consistency with CLASSY design.
  */
 
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { ClassLevel, Stream } from "@/types/school";
 import { STREAM_LABELS } from "@/types/school";
