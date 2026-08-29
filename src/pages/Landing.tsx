@@ -1,8 +1,6 @@
 import { Background } from "@/components/background";
 import { Footer } from "@/components/footer";
 import { GradeChip } from "@/components/gpa/grade-chip";
-import { GpaRing } from "@/components/gpa/gpa-ring";
-import { RatingBadge } from "@/components/gpa/rating-badge";
 import { Logo } from "@/components/logo";
 import { Navbar } from "@/components/navbar";
 import { Button } from "@/components/ui/button";
