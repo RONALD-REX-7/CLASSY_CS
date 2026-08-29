@@ -20,18 +20,15 @@ import { Navbar } from "@/components/navbar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Separator } from "@/components/ui/separator";
 import {
   ExplainableResult,
   ClassificationBadge,
-  SourceLabel,
   WhatIfReport,
   StudentAdmissionReport,
   ActionPlanDisplay,
 } from "@/components/classy";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { cn } from "@/lib/utils";
-import { APP_NAME } from "@/lib/constants";
 import {
   DEMO_LABEL,
   DEMO_MODE_KEY,
@@ -86,7 +83,7 @@ import {
   Zap,
   Info,
 } from "lucide-react";
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
 import { useState, useMemo } from "react";
 
 /* ------------------------------------------------------------------ */
