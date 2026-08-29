@@ -58,6 +58,9 @@ export {
   type NEETResult,
 } from "./neet/engine";
 
+// College recommendations
+export * from "./college";
+
 // Generic
 export {
   checkEligibility,
