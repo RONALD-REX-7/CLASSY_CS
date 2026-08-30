@@ -8,18 +8,17 @@ import { ArrowRight, Menu, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router";
 
-/** Primary product navigation — reflects CLASSY's evolved structure. */
+/** Primary product navigation — task-oriented labels. */
 const NAV_LINKS = [
-  { label: "School", href: "/school" },
-  { label: "College", href: "/calculator" },
+  { label: "Academic", href: "/calculator" },
   { label: "Admission", href: "/admission" },
   { label: "Explore", href: "/explore" },
-  { label: "My Classy", href: "/dashboard" },
+  { label: "My Classy", href: "/my-classy" },
 ];
 
 /**
- * Sticky glass navbar shared by every CLASSY page.
- * Turns opaque once scrolled, collapses into animated menu on mobile.
+ * Sticky navigation shared by every CLASSY page.
+ * Uses a clean border-based scroll state instead of glass effects.
  */
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -41,33 +40,30 @@ export function Navbar() {
   return (
     <header
       className={cn(
-        "no-print sticky top-0 z-40 transition-all duration-300",
+        "no-print sticky top-0 z-40 transition-colors duration-200",
         scrolled
-          ? "glass shadow-[0_8px_30px_-12px_rgba(58,84,180,0.25)]"
-          : "border-b border-transparent bg-transparent",
+          ? "border-b border-border/60 bg-background/90 backdrop-blur-md"
+          : "bg-transparent",
       )}
     >
       <nav
         aria-label="Primary"
-        className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6"
+        className="mx-auto flex h-14 max-w-5xl items-center justify-between gap-4 px-4 sm:px-6"
       >
         {/* Brand */}
         <Link
           to="/"
-          className="group flex items-center gap-2.5 rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="group flex items-center gap-2 outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-lg"
           aria-label={`${APP_NAME} home`}
         >
-          <Logo
-            size={32}
-            className="transition-transform duration-300 group-hover:scale-105 group-hover:-rotate-3"
-          />
-          <span className="font-display text-lg font-bold tracking-tight text-foreground">
+          <Logo size={28} className="transition-transform duration-200 group-hover:scale-105" />
+          <span className="font-display text-base font-bold tracking-tight text-foreground">
             {APP_NAME}
           </span>
         </Link>
 
         {/* Desktop links */}
-        <div className="hidden items-center gap-1 md:flex">
+        <div className="hidden items-center gap-0.5 md:flex">
           {NAV_LINKS.map((link) => {
             const isActive = isLinkActive(link.href);
             return (
@@ -75,11 +71,12 @@ export function Navbar() {
                 key={link.label}
                 to={link.href}
                 onClick={closeMenu}
-                aria-current={isActive ? "true" : undefined}
+                aria-current={isActive ? "page" : undefined}
                 className={cn(
-                  "rounded-full px-3.5 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-white/50 hover:text-foreground dark:hover:bg-white/5",
-                  isActive &&
-                    "bg-indigo-500/10 font-semibold text-indigo-600 dark:bg-white/10 dark:text-indigo-300",
+                  "rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
+                  isActive
+                    ? "text-foreground font-semibold"
+                    : "text-muted-foreground hover:text-foreground",
                 )}
               >
                 {link.label}
@@ -93,18 +90,18 @@ export function Navbar() {
           <ThemeToggle className="hidden sm:inline-flex" />
           <Button
             asChild
-            className="btn-grad hidden rounded-full border-0 text-white sm:inline-flex"
+            className="hidden sm:inline-flex h-8 rounded-md bg-foreground text-background px-3.5 text-xs font-semibold hover:bg-foreground/90"
           >
-            <Link to="/school" onClick={closeMenu}>
-              Get started
-              <ArrowRight className="size-4" />
+            <Link to="/calculator" onClick={closeMenu}>
+              Calculate GPA
+              <ArrowRight className="size-3.5" />
             </Link>
           </Button>
 
           {/* Mobile menu trigger */}
           <Button
             type="button"
-            variant="outline"
+            variant="ghost"
             size="icon"
             className="md:hidden"
             aria-label={menuOpen ? "Close menu" : "Open menu"}
@@ -123,10 +120,10 @@ export function Navbar() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.25, ease: "easeInOut" }}
-            className="glass overflow-hidden border-t md:hidden"
+            transition={{ duration: 0.2, ease: "easeInOut" }}
+            className="overflow-hidden border-b border-border/60 bg-background md:hidden"
           >
-            <div className="mx-auto flex max-w-6xl flex-col gap-1 px-4 py-4">
+            <div className="mx-auto flex max-w-5xl flex-col gap-0.5 px-4 py-3">
               {NAV_LINKS.map((link) => {
                 const isActive = isLinkActive(link.href);
                 return (
@@ -134,26 +131,27 @@ export function Navbar() {
                     key={link.label}
                     to={link.href}
                     onClick={closeMenu}
-                    aria-current={isActive ? "true" : undefined}
+                    aria-current={isActive ? "page" : undefined}
                     className={cn(
-                      "rounded-xl px-4 py-3 text-sm font-semibold text-foreground transition-colors hover:bg-white/60 dark:hover:bg-white/10",
-                      isActive &&
-                        "bg-indigo-500/10 text-indigo-600 dark:bg-white/10 dark:text-indigo-300",
+                      "rounded-md px-3 py-2.5 text-sm font-medium transition-colors",
+                      isActive
+                        ? "bg-muted text-foreground font-semibold"
+                        : "text-muted-foreground hover:text-foreground hover:bg-muted/50",
                     )}
                   >
                     {link.label}
                   </Link>
                 );
               })}
-              <div className="mt-2 flex items-center justify-between gap-3 border-t border-foreground/10 pt-4">
+              <div className="mt-2 flex items-center gap-3 border-t border-border/60 pt-3">
                 <ThemeToggle />
                 <Button
                   asChild
-                  className="btn-grad flex-1 rounded-full border-0 text-white"
+                  className="flex-1 h-9 rounded-md bg-foreground text-background text-xs font-semibold hover:bg-foreground/90"
                 >
-                  <Link to="/school" onClick={closeMenu}>
-                    Get started
-                    <ArrowRight className="size-4" />
+                  <Link to="/calculator" onClick={closeMenu}>
+                    Calculate GPA
+                    <ArrowRight className="size-3.5" />
                   </Link>
                 </Button>
               </div>

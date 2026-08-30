@@ -1,67 +1,57 @@
 import { Logo } from "@/components/logo";
-import { APP_NAME, APP_TAGLINE, APP_VERSION } from "@/lib/constants";
-import { ShieldCheck, WifiOff } from "lucide-react";
+import { APP_NAME, APP_VERSION } from "@/lib/constants";
 import { Link } from "react-router";
 
 const COLUMNS = [
   {
     title: "Product",
     links: [
-      { label: "Calculator", href: "/calculator" },
-      { label: "Features", href: "/#features" },
-      { label: "How it works", href: "/#how" },
+      { label: "Academic Calculator", href: "/calculator" },
+      { label: "School", href: "/school" },
+      { label: "Admission", href: "/admission" },
+      { label: "Explore", href: "/explore" },
     ],
   },
   {
-    title: "Reference",
+    title: "Admission",
     links: [
-      { label: "Grade scale", href: "/#scale" },
-      { label: "GPA formula", href: "/#formula" },
-      { label: "Back to top", href: "/#" },
+      { label: "TNEA Planner", href: "/admission/tnea" },
+      { label: "JEE Planner", href: "/admission/jee" },
+      { label: "NEET Planner", href: "/admission/neet" },
     ],
   },
 ];
 
 /**
- * Shared page footer — includes the app version badge and a local-first
- * privacy note (all data lives in the browser).
+ * Page footer with useful product links.
+ * Clean, minimal, no decorative glass effects.
  */
 export function Footer() {
   return (
-    <footer className="no-print border-t border-foreground/8 bg-white/30 dark:bg-white/[0.02]">
-      <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
-        <div className="grid gap-10 md:grid-cols-[1.4fr_1fr_1fr]">
+    <footer className="no-print border-t border-border/60">
+      <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
+        <div className="grid gap-8 sm:grid-cols-[1.2fr_1fr_1fr]">
           {/* Brand */}
           <div className="max-w-xs">
-            <Link to="/" className="flex items-center gap-2.5">
-              <Logo size={30} />
-              <span className="font-display text-lg font-bold tracking-tight">
+            <Link to="/" className="flex items-center gap-2">
+              <Logo size={26} />
+              <span className="font-display text-sm font-bold tracking-tight">
                 {APP_NAME}
               </span>
             </Link>
-            <p className="mt-3 text-sm leading-6 text-muted-foreground">
-              {APP_TAGLINE} No sign-up, no tracking — just a beautifully
-              simple tool that works offline.
+            <p className="mt-2.5 text-sm leading-relaxed text-muted-foreground">
+              Student academic companion. Calculate GPA, track performance,
+              explore admission pathways. No sign-up required.
             </p>
-            <div className="mt-4 flex flex-wrap gap-2">
-              <span className="glass-soft inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium text-muted-foreground">
-                <ShieldCheck className="size-3.5 text-emerald-500" />
-                Local-first
-              </span>
-              <span className="glass-soft inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium text-muted-foreground">
-                <WifiOff className="size-3.5 text-sky-500" />
-                Works offline
-              </span>
-            </div>
           </div>
 
           {/* Link columns */}
           {COLUMNS.map((column) => (
             <nav key={column.title} aria-label={column.title}>
-              <h3 className="font-display text-sm font-semibold tracking-wide text-foreground">
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 {column.title}
               </h3>
-              <ul className="mt-3 space-y-2.5">
+              <ul className="mt-2.5 space-y-2">
                 {column.links.map((link) => (
                   <li key={link.label}>
                     <Link
@@ -78,15 +68,13 @@ export function Footer() {
         </div>
 
         {/* Bottom bar */}
-        <div className="mt-10 flex flex-col items-center justify-between gap-3 border-t border-foreground/8 pt-6 sm:flex-row">
+        <div className="mt-8 flex flex-col items-center justify-between gap-2 border-t border-border/60 pt-5 sm:flex-row">
           <p className="text-xs text-muted-foreground">
-            © {new Date().getFullYear()} {APP_NAME}. Made with care for
-            students everywhere.
+            © {new Date().getFullYear()} {APP_NAME}.
           </p>
-          <span className="glass-soft inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold text-muted-foreground">
-            <span className="size-1.5 rounded-full bg-emerald-500" aria-hidden="true" />
-            v{APP_VERSION}
-          </span>
+          <p className="text-xs text-muted-foreground">
+            v{APP_VERSION} · Data stays on your device
+          </p>
         </div>
       </div>
     </footer>
