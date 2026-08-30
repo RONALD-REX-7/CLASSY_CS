@@ -21,9 +21,6 @@ import { motion } from "framer-motion";
 import { useState, useMemo } from "react";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import {
-  evaluateJeeMainEligibility,
-  checkJeeAdvancedQualification,
-  JEE_MAIN_PAPERS,
 } from "@/lib/admissions";
 import { calculateAcademicPerformance } from "@/lib/school/engine";
 import { DEMO_MODE_KEY } from "@/lib/demo-data";
@@ -32,13 +29,9 @@ import type { StudentProfile } from "@/types";
 import {
   ArrowRight,
   Award,
-  BookOpen,
   CheckCircle,
   Compass,
-  GraduationCap,
   Info,
-  Landmark,
-  Shield,
   Sparkles,
   Target,
 } from "lucide-react";

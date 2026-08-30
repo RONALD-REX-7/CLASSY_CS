@@ -15,13 +15,11 @@ import { useState, useMemo } from "react";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import {
   calculateAcademicPerformance,
-  formatPercentage,
 } from "@/lib/school/engine";
 import type { SchoolSubject } from "@/types/school";
 import {
   ActionPlanDisplay,
   ExplainableResult,
-  WhatIfReport,
 } from "@/components/classy";
 import {
   DEMO_LABEL,
@@ -42,14 +40,11 @@ import type { StudentProfile } from "@/types";
 import {
   ArrowRight,
   BookOpen,
-  GraduationCap,
-  Map,
   Shield,
   Sparkles,
   Target,
   TrendingUp,
   User,
-  Zap,
 } from "lucide-react";
 
 const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];

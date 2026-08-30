@@ -23,12 +23,9 @@ import { useLocalStorage } from "@/hooks/use-local-storage";
 import { DEMO_MODE_KEY } from "@/lib/demo-data";
 import {
   ArrowRight,
-  BookOpen,
-  CheckCircle,
   Heart,
   Info,
   Sparkles,
-  Stethoscope,
 } from "lucide-react";
 
 const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];

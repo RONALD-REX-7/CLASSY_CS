@@ -17,12 +17,8 @@ import {
   FlaskConical,
   GraduationCap,
   Heart,
-  Landmark,
   MapPin,
-  Microscope,
   Search,
-  Stethoscope,
-  Zap,
 } from "lucide-react";
 
 const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];

@@ -25,7 +25,6 @@ import {
   calculateTneaScore,
   evaluateTneaEligibility,
   TNEA_CATEGORIES,
-  type TNEACategory,
 } from "@/lib/admissions";
 import { calculateAcademicPerformance } from "@/lib/school/engine";
 import {
@@ -34,7 +33,6 @@ import {
   DEMO_CLASS12_SUBJECTS,
   DEMO_PROFILE,
   DEMO_TNEA_SCORE,
-  DEMO_CATEGORY,
   DEMO_TARGET_LADDER,
 } from "@/lib/demo-data";
 import type { SchoolSubject } from "@/types/school";
@@ -46,22 +44,13 @@ import {
   ArrowDown,
   BookOpen,
   CheckCircle,
-  ChevronDown,
-  ChevronUp,
-  ClipboardList,
-  FileText,
-  GraduationCap,
   Info,
-  Landmark,
   ListChecks,
   Map,
   Plus,
-  Search,
-  Shield,
   Sparkles,
   Target,
   Trash2,
-  X,
 } from "lucide-react";
 
 const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
@@ -142,7 +131,7 @@ const DEMO_CHOICES: ChoiceItem[] = [
 export default function TNEAPlanner() {
   const [isDemoMode, setIsDemoMode] = useLocalStorage<boolean>(STORAGE.demoMode, false);
   const [activeTab, setActiveTab] = useState<"score" | "targets" | "choices" | "guide">("score");
-  const [category, setCategory] = useLocalStorage<TNEACategory>(STORAGE.tneaCategory, "OC");
+  const [category, setCategory] = useLocalStorage<string>(STORAGE.tneaCategory, "OC");
   const [storedSubjects] = useLocalStorage<SchoolSubject[]>(STORAGE.subjects12, []);
   const [storedProfile] = useLocalStorage<Partial<StudentProfile>>(STORAGE.profile, {});
   const [choiceList, setChoiceList] = useLocalStorage<ChoiceItem[]>(STORAGE.choiceList, []);
@@ -189,7 +178,7 @@ export default function TNEAPlanner() {
   // Eligibility
   const eligibility = useMemo(() => {
     if (!profile || subjects.length === 0) return null;
-    return evaluateTneaEligibility(profile, academicPerf as any, subjects, category);
+    return evaluateTneaEligibility(profile, academicPerf as any, subjects, category as any);
   }, [profile, subjects, category, academicPerf]);
 
   // Target ladder (demo or computed)
