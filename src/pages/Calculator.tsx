@@ -39,7 +39,7 @@ import {
 } from "@/lib/gpa";
 import { exportGpaPdf, type ReportProfile } from "@/lib/pdf";
 import { AnimatePresence, motion } from "framer-motion";
-import { Calculator as CalculatorIcon, GraduationCap, Plus } from "lucide-react";
+import { GraduationCap, Plus } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
@@ -65,6 +65,7 @@ export default function Calculator() {
     EMPTY_PROFILE,
   );
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [prevSemesters, setPrevSemesters] = useState<Semester[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [confirm, setConfirm] = useState<ConfirmState | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -100,11 +101,19 @@ export default function Calculator() {
         /* ignore corrupt legacy data */
       }
       if (!migrated) setSemesters([createSemester("Semester 1")]);
-      return;
     }
-    // Keep the most recent semester expanded by default.
-    setExpandedId((prev) => prev ?? semesters[semesters.length - 1].id);
   }, [semesters, setSemesters]);
+
+  /* Keep the most recent semester expanded by default. Done during render
+     via React's documented "adjust state when input changes" pattern — it
+     fires at exactly the points the previous effect did (on hydration and
+     on every semesters change) without an extra render pass. */
+  if (prevSemesters !== semesters) {
+    setPrevSemesters(semesters);
+    setExpandedId(
+      (prev) => prev ?? semesters[semesters.length - 1]?.id ?? null,
+    );
+  }
 
   /* --------------------------- derived state -------------------------- */
   const totals = useMemo(() => computeCgpaTotals(semesters), [semesters]);
@@ -356,7 +365,7 @@ export default function Calculator() {
     };
     reader.readAsText(file);
     // Reset the input so selecting the same file again still fires onChange.
-    fileInputRef.current && (fileInputRef.current.value = "");
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const handleCopy = async () => {

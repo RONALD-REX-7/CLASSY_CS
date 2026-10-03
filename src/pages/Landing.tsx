@@ -16,7 +16,6 @@ import {
   WifiOff,
   Zap,
 } from "lucide-react";
-import type { ReactNode } from "react";
 import { Link } from "react-router";
 
 /* ------------------------------------------------------------------ */
