@@ -141,7 +141,7 @@ export default function Calculator() {
   const handleDuplicateSemester = (id: string) => {
     const copyId = createId();
     setSemesters((prev) => {
-      const index = prev.findIndex((semester) => semester.id === id);
+      const index = prev.findIndex((item) => item.id === id);
       if (index === -1) return prev;
       const source = prev[index];
       const copy: Semester = {
@@ -394,6 +394,9 @@ export default function Calculator() {
     const fresh = createSemester("Semester 1");
     setSemesters([fresh]);
     setExpandedId(fresh.id);
+    // Also clear the optional report profile (name/semester) left over from
+    // older versions, so Reset really removes everything this app stored.
+    setProfile(EMPTY_PROFILE);
     toast.info("Calculator reset");
   };
 

@@ -70,11 +70,29 @@ export function Footer() {
         {/* Bottom bar */}
         <div className="mt-8 flex flex-col items-center justify-between gap-2 border-t border-border/60 pt-5 sm:flex-row">
           <p className="text-xs text-muted-foreground">
-            © {new Date().getFullYear()} {APP_NAME}.
+            © {new Date().getFullYear()} {APP_NAME} · an independent student
+            project
           </p>
-          <p className="text-xs text-muted-foreground">
-            v{APP_VERSION} · Data stays on your device
-          </p>
+          <nav
+            aria-label="Legal"
+            className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1"
+          >
+            <Link
+              to="/privacy"
+              className="text-xs text-muted-foreground transition-colors hover:text-foreground"
+            >
+              Privacy Policy
+            </Link>
+            <Link
+              to="/terms"
+              className="text-xs text-muted-foreground transition-colors hover:text-foreground"
+            >
+              Terms of Service
+            </Link>
+            <span className="text-xs text-muted-foreground">
+              v{APP_VERSION} · Data stays on your device
+            </span>
+          </nav>
         </div>
       </div>
     </footer>

@@ -20,6 +20,8 @@ const AdmissionPage = lazy(() => import("./pages/Admission.tsx"));
 const ExplorePage = lazy(() => import("./pages/Explore.tsx"));
 const MyClassyPage = lazy(() => import("./pages/MyClassy.tsx"));
 const CollegePage = lazy(() => import("./pages/College.tsx"));
+const PrivacyPage = lazy(() => import("./pages/Privacy.tsx"));
+const TermsPage = lazy(() => import("./pages/Terms.tsx"));
 const TNEAPlannerPage = lazy(() => import("./pages/admission/TNEAPlanner.tsx"));
 const JEEPlannerPage = lazy(() => import("./pages/admission/JEEPlanner.tsx"));
 const NEETPlannerPage = lazy(() => import("./pages/admission/NEETPlanner.tsx"));
@@ -69,8 +71,8 @@ class RootErrorBoundary extends React.Component<
       stack: error.stack || "",
     };
   }
-  componentDidCatch(err: Error) {
-    console.error("[WebContainer preview] Root crash:", err);
+  componentDidCatch(error: Error) {
+    console.error("[WebContainer preview] Root crash:", error);
   }
   render() {
     if (this.state.hasError) {
@@ -208,6 +210,9 @@ const app = (
           <Route path="/admission/tnea" element={<TNEAPlannerPage />} />
           <Route path="/admission/jee" element={<JEEPlannerPage />} />
           <Route path="/admission/neet" element={<NEETPlannerPage />} />
+          {/* Legal */}
+          <Route path="/privacy" element={<PrivacyPage />} />
+          <Route path="/terms" element={<TermsPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>

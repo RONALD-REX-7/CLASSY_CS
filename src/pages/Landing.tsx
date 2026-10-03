@@ -53,8 +53,8 @@ function HeroPanel() {
             Your CLASSY Dashboard
           </p>
         </div>
-        <span className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">
-          Live
+        <span className="text-[10px] font-semibold text-muted-foreground">
+          Example data
         </span>
       </div>
 
@@ -119,6 +119,11 @@ function HeroPanel() {
           </div>
         ))}
       </div>
+
+      {/* Honest caption — the numbers above are a mock-up, not user data. */}
+      <p className="border-t border-border/60 px-5 py-2.5 text-[10px] text-muted-foreground">
+        Illustrative sample data — your own numbers appear once you add them.
+      </p>
     </motion.div>
   );
 }
