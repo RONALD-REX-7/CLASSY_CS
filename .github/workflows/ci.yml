@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [main, master]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 permissions:
   contents: read
 
@@ -13,18 +17,22 @@ jobs:
   build-and-test:
     name: Lint, Test & Build
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
-          node-version: 22
+          node-version: 26
           cache: 'npm'
 
       - name: Install dependencies
         run: npm install --legacy-peer-deps --no-audit --include=dev
+
+      - name: Run ESLint
+        run: node ./node_modules/eslint/bin/eslint.js .
 
       - name: TypeScript typecheck
         run: node ./node_modules/typescript/bin/tsc --noEmit
