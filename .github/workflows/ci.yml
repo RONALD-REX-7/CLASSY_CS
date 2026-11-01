@@ -24,13 +24,13 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm install --legacy-peer-deps --no-audit
+        run: npm install --legacy-peer-deps --no-audit --include=dev
 
       - name: Run lint
-        run: npm run lint
+        run: node ./node_modules/eslint/bin/eslint.js .
 
       - name: Run unit tests
         run: npm test
 
       - name: Run production build
-        run: npm run build
+        run: node ./node_modules/typescript/bin/tsc -b && node ./node_modules/vite/bin/vite.js build
