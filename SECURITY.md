@@ -17,3 +17,4 @@ If you discover a potential security vulnerability within **CLASSY_CS** (such as
 3. **Include Details**: Provide a description of the vulnerability, reproduction steps or test payload, and expected vs observed security impact.
 
 Reports will be reviewed and addressed promptly.
+
