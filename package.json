@@ -1,5 +1,5 @@
 {
-  "name": "vite-template",
+  "name": "classy-cs",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -12,7 +12,8 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "preview": "vite preview",
-    "postinstall": "node scripts/patch-convex-ws.cjs"
+    "postinstall": "node scripts/patch-convex-ws.cjs",
+    "test": "vitest run"
   },
   "dependencies": {
     "@convex-dev/auth": "^0.0.90",

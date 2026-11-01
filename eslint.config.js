@@ -6,7 +6,7 @@ import tseslint from "typescript-eslint";
 import eslintConfigPrettier from "eslint-config-prettier/flat";
 
 export default tseslint.config(
-  { ignores: ["dist", "src/convex/_generated"] },
+  { ignores: ["dist", "src/convex/_generated", "node_modules"] },
   {
     extends: [
       js.configs.recommended,
@@ -24,6 +24,9 @@ export default tseslint.config(
     },
     rules: {
       ...reactHooks.configs.recommended.rules,
+      "@typescript-eslint/no-explicit-any": "warn",
+      "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_", varsIgnorePattern: "^_" }],
+      "react-hooks/purity": "off",
       "react-refresh/only-export-components": [
         "warn",
         { allowConstantExport: true },

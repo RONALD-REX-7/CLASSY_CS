@@ -19,7 +19,7 @@ import { calculateTneaScore, evaluateTneaEligibility, TNEA_CATEGORIES } from "..
 import { evaluateJeeMainEligibility, checkJeeAdvancedQualification } from "../jee-main/engine";
 import { evaluateIitAdmissionEligibility, checkTop20Percentile } from "../jee-advanced/engine";
 import { evaluateNeetQualification, assessMedicalCompetitiveness } from "../neet/engine";
-import { checkRuleFreshness, checkVerificationFreshness, detectConflicts, getConflictStatus } from "../rule-engine";
+import { checkRuleFreshness, checkVerificationFreshness, detectConflicts, getConflictStatus, getCurrentAcademicYear } from "../rule-engine";
 import type { SchoolSubject } from "@/types/school";
 import type { StudentProfile, AcademicResult } from "@/types";
 import type { AdmissionRule } from "@/types/rules";
@@ -367,7 +367,7 @@ describe("NEET Engine", () => {
 describe("Rule Versioning", () => {
   describe("checkRuleFreshness", () => {
     it("identifies current-year rules", () => {
-      const rule = createRule({ academicYear: "2025-26" });
+      const rule = createRule({ academicYear: getCurrentAcademicYear() });
       const freshness = checkRuleFreshness(rule);
       expect(freshness.isCurrent).toBe(true);
     });

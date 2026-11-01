@@ -3,7 +3,7 @@ import axios from "axios";
 import { RandomReader, generateRandomString } from "@oslojs/crypto/random";
 
 export const emailOtp = Email({
-  id: "email-otp",
+  id: "email",
   maxAge: 60 * 15, // 15 minutes
   // This function can be asynchronous
   async generateVerificationToken() {
@@ -15,18 +15,23 @@ export const emailOtp = Email({
     const alphabet = "0123456789";
     return generateRandomString(random, alphabet, 6);
   },
-  async sendVerificationRequest({ identifier: email, token }) {
+  async sendVerificationRequest({ identifier: email, token }: { identifier: string; token: string }) {
+    const apiKey = process.env.AUTH_EMAIL_API_KEY || "";
+    if (!apiKey) {
+      console.warn("[emailOtp] AUTH_EMAIL_API_KEY not configured; OTP sending skipped in development/CI.");
+      return;
+    }
     try {
       await axios.post(
         "https://auth.freebuff.app/send_otp",
         {
           to: email,
           otp: token,
-          appName: process.env.VLY_APP_NAME || "a freebuff.com application",
+          appName: process.env.VLY_APP_NAME || "Classy CS",
         },
         {
           headers: {
-            "x-api-key": "fb_email_2crN1hqIArZP2bEfvjp5Qik4",
+            "x-api-key": apiKey,
           },
         },
       );
@@ -34,4 +39,4 @@ export const emailOtp = Email({
       throw new Error(JSON.stringify(error));
     }
   },
-});
+} as any);

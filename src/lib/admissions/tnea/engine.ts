@@ -167,7 +167,7 @@ export function evaluateTneaEligibility(
   // Evaluate using the generic engine
   return evaluateRules(
     rules,
-    { authority: TNEA_AUTHORITY, pathway: category, academicYear },
+    { authority: TNEA_AUTHORITY, academicYear },
     (ruleType) => {
       switch (ruleType) {
         case "class-12-pass":
@@ -273,7 +273,7 @@ function createTneaCategoryRules(
   return {
     id: `tnea-category-${category.toLowerCase()}-${academicYear}` as any,
     authority: TNEA_AUTHORITY,
-    pathway: category.toLowerCase(),
+    pathway: category,
     academicYear,
     version: 1,
     eligibilityRules: [],

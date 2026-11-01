@@ -236,9 +236,10 @@ export function evaluateStringRule(
   switch (rule.operator) {
     case "eq":
       return actualValue === (rule.value as string);
-    case "in":
+    case "in": {
       const vals = Array.isArray(rule.value) ? rule.value.map(String) : [String(rule.value)];
       return vals.includes(actualValue);
+    }
     default:
       return true;
   }
@@ -288,7 +289,7 @@ export function evaluateRules(
       reasons.push(verification.label);
     }
 
-    rulesApplied.push(`${rule.authority} ${rule.academicYear} v${rule.version} [${rule.status}]`);
+    rulesApplied.push(`${rule.authority} ${rule.pathway ? `(${rule.pathway}) ` : ""}${rule.academicYear} v${rule.version} [${rule.status}]`);
     sources.push(rule.sourceUrl ?? `Rule ${rule.id}`);
 
     // Evaluate each eligibility rule
