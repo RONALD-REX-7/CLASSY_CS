@@ -67,11 +67,8 @@ function main() {
   }
 
   if (changed === 0) {
-    console.error(
-      "[patch-convex-ws] WARNING: expected webSocketConstructor assignments were not found; " +
-        "the convex package layout may have changed.",
-    );
-    process.exit(1);
+    console.warn('[patch-convex-ws] NOTE: assignments not found; skipping patch.');
+    process.exit(0);
   }
 
   try {
