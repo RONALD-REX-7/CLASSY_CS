@@ -9,7 +9,6 @@
 import type {
   AcademicPathway,
   ClassLevel,
-  PathwayOption,
   Stream,
 } from "@/types/school";
 

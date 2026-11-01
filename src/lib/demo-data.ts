@@ -5,12 +5,11 @@
  * Never mixes with real student data.
  */
 
-import type { StudentProfile, AcademicResult } from "@/types";
+import type { StudentProfile } from "@/types";
 import type { SchoolSubject } from "@/types/school";
 import type {
   CollegeExtended,
   CutoffExtended,
-  CollegeRecommendation,
   TargetLadder,
   AdmissionReadiness,
 } from "@/types/college";

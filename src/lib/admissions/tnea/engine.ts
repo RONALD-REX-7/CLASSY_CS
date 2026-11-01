@@ -23,10 +23,8 @@
 import type { StudentProfile, AcademicResult } from "@/types";
 import type {
   AdmissionRule,
-  CalculationAudit,
-  CalculationRule,
-  CategoryRule,
-  SubjectRule,
+  AdmissionRuleId,
+  DataSourceId,
 } from "@/types/rules";
 import type { SchoolSubject } from "@/types/school";
 import {
@@ -200,7 +198,7 @@ export function evaluateTneaEligibility(
 function createTneaCoreRules(academicYear: string): AdmissionRule {
   const now = new Date().toISOString();
   return {
-    id: `tnea-core-${academicYear}` as any,
+    id: `tnea-core-${academicYear}` as AdmissionRuleId,
     authority: TNEA_AUTHORITY,
     pathway: "core",
     academicYear,
@@ -243,7 +241,7 @@ function createTneaCoreRules(academicYear: string): AdmissionRule {
       { subject: "Physics", mandatory: true, maxMarks: 100 },
       { subject: "Chemistry", mandatory: true, maxMarks: 100 },
     ],
-    source: "" as any,
+    source: "" as DataSourceId,
     sourceUrl: "https://www.tneaonline.org",
     status: "VERIFIED",
     createdAt: now,
@@ -271,7 +269,7 @@ function createTneaCategoryRules(
   if (!info) return null;
 
   return {
-    id: `tnea-category-${category.toLowerCase()}-${academicYear}` as any,
+    id: `tnea-category-${category.toLowerCase()}-${academicYear}` as AdmissionRuleId,
     authority: TNEA_AUTHORITY,
     pathway: category,
     academicYear,
@@ -288,7 +286,7 @@ function createTneaCategoryRules(
       },
     ],
     subjectRules: [],
-    source: "" as any,
+    source: "" as DataSourceId,
     sourceUrl: "https://www.tneaonline.org",
     status: "VERIFIED",
     createdAt: now,

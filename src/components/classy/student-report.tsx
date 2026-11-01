@@ -16,7 +16,6 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { SourceLabel, type DataSourceLabel } from "./explainable-result";
 import { ClassificationBadge } from "./explainable-result";
 import { cn } from "@/lib/utils";
 import {
@@ -24,8 +23,6 @@ import {
   GraduationCap,
   Target,
   AlertTriangle,
-  BookOpen,
-  ArrowRight,
   FileText,
   Shield,
 } from "lucide-react";

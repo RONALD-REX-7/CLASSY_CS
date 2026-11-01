@@ -14,7 +14,6 @@ import {
   evaluateRules,
   getCurrentAcademicYear,
   type EligibilityResult,
-  type CalculationResult,
 } from "../rule-engine";
 
 /* ------------------------------------------------------------------ */

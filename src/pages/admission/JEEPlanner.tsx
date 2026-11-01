@@ -20,12 +20,9 @@ import { Link } from "react-router";
 import { motion } from "framer-motion";
 import { useState, useMemo } from "react";
 import { useLocalStorage } from "@/hooks/use-local-storage";
-import {
-} from "@/lib/admissions";
 import { calculateAcademicPerformance } from "@/lib/school/engine";
 import { DEMO_MODE_KEY } from "@/lib/demo-data";
 import type { SchoolSubject } from "@/types/school";
-import type { StudentProfile } from "@/types";
 import {
   ArrowRight,
   Award,
@@ -33,7 +30,6 @@ import {
   Compass,
   Info,
   Sparkles,
-  Target,
 } from "lucide-react";
 
 const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
@@ -48,7 +44,6 @@ export default function JEEPlanner() {
   const [isDemoMode, setIsDemoMode] = useLocalStorage<boolean>(STORAGE.demoMode, false);
   const [activeTab, setActiveTab] = useState<"main" | "advanced">("main");
   const [storedSubjects] = useLocalStorage<SchoolSubject[]>(STORAGE.subjects12, []);
-  const [storedProfile] = useLocalStorage<Partial<StudentProfile>>(STORAGE.profile, {});
 
   // JEE Main inputs
   const [paper, setPaper] = useState<string>("paper1");
@@ -59,8 +54,10 @@ export default function JEEPlanner() {
   const [jeeMainScore, setJeeMainScore] = useState("");
   const [jeeAdvScore, setJeeAdvScore] = useState("");
 
-  const subjects = isDemoMode ? [] : storedSubjects;
-  const profile = isDemoMode ? { name: "Demo Student", state: "Tamil Nadu" } as any : { ...{ name: "Student" } as any, ...storedProfile } as StudentProfile;
+  const subjects = useMemo(
+    () => (isDemoMode ? [] : storedSubjects),
+    [isDemoMode, storedSubjects],
+  );
 
   const academicPerf = useMemo(
     () => (subjects.length > 0 ? calculateAcademicPerformance(subjects) : null),

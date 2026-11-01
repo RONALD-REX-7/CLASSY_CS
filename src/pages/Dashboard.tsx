@@ -36,51 +36,28 @@ import {
   DEMO_CLASS12_SUBJECTS,
   DEMO_TNEA_SCORE,
   DEMO_CATEGORY,
-  DEMO_AUTHORITY,
-  DEMO_COLLEGES,
-  DEMO_CUTOFFS,
   DEMO_TARGET_LADDER,
   DEMO_READINESS,
 } from "@/lib/demo-data";
 import {
   calculateAcademicPerformance,
-  formatPercentage,
-  formatMarks,
 } from "@/lib/school/engine";
-import {
-  calculateTneaScore,
-  evaluateTneaEligibility,
-  TNEA_CATEGORIES,
-} from "@/lib/admissions";
-import {
-  assessAdmissionReadiness,
-  createWhatIfScenario,
-  compareScenarios,
-  generateActionPlan,
-} from "@/lib/admissions/college/recommendation";
+
 import type { SchoolSubject } from "@/types/school";
 import type {
   TargetLadder,
   AdmissionReadiness,
   ActionPlan,
-  WhatIfScenario,
-  ScenarioComparison,
-  CutoffExtended,
-  CollegeExtended,
 } from "@/types/college";
 import type { StudentProfile } from "@/types";
 import {
-  GraduationCap,
   Target,
-  Shield,
   BookOpen,
-  TrendingUp,
   AlertCircle,
   FileText,
   Sparkles,
   BarChart3,
   Zap,
-  Info,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useState, useMemo } from "react";
@@ -156,7 +133,7 @@ export default function Dashboard() {
   const [categoryStr] = useLocalStorage<string>(STORAGE.category, "General");
 
   // Use demo data when in demo mode
-  const profile = isDemoMode ? DEMO_PROFILE : { ...DEMO_PROFILE, ...storedProfile, id: (storedProfile.id || "user-profile") as any } as StudentProfile;
+  const profile = isDemoMode ? DEMO_PROFILE : ({ ...DEMO_PROFILE, ...storedProfile, id: (storedProfile.id || "user-profile") as unknown as StudentProfile["id"] } as StudentProfile);
   const class12Subjects = isDemoMode ? DEMO_CLASS12_SUBJECTS : subjects12;
   const tneaScore = isDemoMode ? DEMO_TNEA_SCORE : (tneaScoreStr ? parseFloat(tneaScoreStr) : undefined);
   const category = isDemoMode ? DEMO_CATEGORY : (categoryStr || "General");

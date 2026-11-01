@@ -11,9 +11,6 @@
 
 import type {
   AcademicResult,
-  CollegeId,
-  CourseId,
-  ScenarioId,
   StudentProfile,
 } from "@/types";
 import type { AdmissionRule, EligibilityRule } from "@/types/rules";

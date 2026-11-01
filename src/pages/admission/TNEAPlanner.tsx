@@ -25,6 +25,7 @@ import {
   calculateTneaScore,
   evaluateTneaEligibility,
   TNEA_CATEGORIES,
+  type TNEACategory,
 } from "@/lib/admissions";
 import { calculateAcademicPerformance } from "@/lib/school/engine";
 import {
@@ -37,7 +38,7 @@ import {
 } from "@/lib/demo-data";
 import type { SchoolSubject } from "@/types/school";
 import type { TargetLadder } from "@/types/college";
-import type { StudentProfile } from "@/types";
+import type { StudentProfile, CollegeId, CourseId, AcademicResult } from "@/types";
 import {
   ArrowRight,
   ArrowUp,
@@ -70,8 +71,6 @@ const STORAGE = {
 /* ------------------------------------------------------------------ */
 /* Choice list item type                                               */
 /* ------------------------------------------------------------------ */
-
-type ChoiceList = ChoiceItem[];
 
 interface ChoiceItem {
   id: string;
@@ -146,10 +145,17 @@ export default function TNEAPlanner() {
   const [newBranch, setNewBranch] = useState("");
 
   // Use demo data or real data
-  const subjects = isDemoMode ? DEMO_CLASS12_SUBJECTS : storedSubjects;
-  const profile = isDemoMode
-    ? DEMO_PROFILE
-    : ({ ...DEMO_PROFILE, ...storedProfile, id: storedProfile.id || "user-profile" } as StudentProfile);
+  const subjects = useMemo(
+    () => (isDemoMode ? DEMO_CLASS12_SUBJECTS : storedSubjects),
+    [isDemoMode, storedSubjects],
+  );
+  const profile = useMemo(
+    () =>
+      isDemoMode
+        ? DEMO_PROFILE
+        : ({ ...DEMO_PROFILE, ...storedProfile, id: (storedProfile.id || "user-profile") as unknown as StudentProfile["id"] } as StudentProfile),
+    [isDemoMode, storedProfile],
+  );
   const choices = isDemoMode ? DEMO_CHOICES : choiceList;
 
   // Calculate TNEA score from input marks or from subjects
@@ -178,7 +184,7 @@ export default function TNEAPlanner() {
   // Eligibility
   const eligibility = useMemo(() => {
     if (!profile || subjects.length === 0) return null;
-    return evaluateTneaEligibility(profile, academicPerf as any, subjects, category as any);
+    return evaluateTneaEligibility(profile, academicPerf as unknown as AcademicResult, subjects, category as TNEACategory);
   }, [profile, subjects, category, academicPerf]);
 
   // Target ladder (demo or computed)
@@ -187,12 +193,12 @@ export default function TNEAPlanner() {
     : tneaScore !== undefined
       ? {
           safe: tneaScore >= 185
-            ? [{ collegeId: "1" as any, collegeName: "Local Engineering College", courseName: "ECE", classification: "SAFE" as const, studentScore: tneaScore, cutoffValue: 160, scoreGap: tneaScore - 160, authority: "TNEA", sources: ["Historical"], explanation: "Demo target", courseId: "c1" as any, admissionPath: "tnea", category: category, eligibilityPassed: true }]
+            ? [{ collegeId: "1" as CollegeId, collegeName: "Local Engineering College", courseName: "ECE", classification: "SAFE" as const, studentScore: tneaScore, cutoffValue: 160, scoreGap: tneaScore - 160, authority: "TNEA", sources: ["Historical"], explanation: "Demo target", courseId: "c1" as CourseId, admissionPath: "tnea", category: category, eligibilityPassed: true }]
             : [],
           target: tneaScore >= 170
-            ? [{ collegeId: "2" as any, collegeName: "Regional Engineering College", courseName: "CSE", classification: "TARGET" as const, studentScore: tneaScore, cutoffValue: 175, scoreGap: tneaScore - 175, authority: "TNEA", sources: ["Historical"], explanation: "Demo target", courseId: "c2" as any, admissionPath: "tnea", category: category, eligibilityPassed: true }]
+            ? [{ collegeId: "2" as CollegeId, collegeName: "Regional Engineering College", courseName: "CSE", classification: "TARGET" as const, studentScore: tneaScore, cutoffValue: 175, scoreGap: tneaScore - 175, authority: "TNEA", sources: ["Historical"], explanation: "Demo target", courseId: "c2" as CourseId, admissionPath: "tnea", category: category, eligibilityPassed: true }]
             : [],
-          reach: [{ collegeId: "3" as any, collegeName: "Top Engineering College", courseName: "CSE", classification: "REACH" as const, studentScore: tneaScore, cutoffValue: 195, scoreGap: tneaScore - 195, authority: "TNEA", sources: ["Historical"], explanation: "Demo target", courseId: "c3" as any, admissionPath: "tnea", category: category, eligibilityPassed: true }],
+          reach: [{ collegeId: "3" as CollegeId, collegeName: "Top Engineering College", courseName: "CSE", classification: "REACH" as const, studentScore: tneaScore, cutoffValue: 195, scoreGap: tneaScore - 195, authority: "TNEA", sources: ["Historical"], explanation: "Demo target", courseId: "c3" as CourseId, admissionPath: "tnea", category: category, eligibilityPassed: true }],
           backup: [],
         }
       : { safe: [], target: [], reach: [], backup: [] };

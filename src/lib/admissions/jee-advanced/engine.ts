@@ -26,7 +26,8 @@
 import type { StudentProfile, AcademicResult } from "@/types";
 import type {
   AdmissionRule,
-  CalculationAudit,
+  AdmissionRuleId,
+  DataSourceId,
   EntranceExamModel,
 } from "@/types/rules";
 import type { SchoolSubject } from "@/types/school";
@@ -210,7 +211,7 @@ export function checkTop20Percentile(
 function createIitAdmissionRules(academicYear: string): AdmissionRule {
   const now = new Date().toISOString();
   return {
-    id: `jee-advanced-iit-${academicYear}` as any,
+    id: `jee-advanced-iit-${academicYear}` as AdmissionRuleId,
     authority: JEE_ADV_AUTHORITY,
     pathway: "iit-admission",
     academicYear,
@@ -267,7 +268,7 @@ function createIitAdmissionRules(academicYear: string): AdmissionRule {
       { subject: "Chemistry", mandatory: true },
       { subject: "Mathematics", mandatory: true },
     ],
-    source: "" as any,
+    source: "" as DataSourceId,
     sourceUrl: "https://jeeadv.ac.in",
     status: "VERIFIED",
     createdAt: now,

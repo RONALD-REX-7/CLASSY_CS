@@ -6,7 +6,7 @@ import tseslint from "typescript-eslint";
 import eslintConfigPrettier from "eslint-config-prettier/flat";
 
 export default tseslint.config(
-  { ignores: ["dist", "src/convex/_generated", "node_modules"] },
+  { ignores: ["dist", "src/convex/_generated", "node_modules", "vly-toolbar-readonly.tsx"] },
   {
     extends: [
       js.configs.recommended,
@@ -31,6 +31,18 @@ export default tseslint.config(
         "warn",
         { allowConstantExport: true },
       ],
+    },
+  },
+  {
+    files: ["src/components/ui/**", "src/main.tsx"],
+    rules: {
+      "react-refresh/only-export-components": "off",
+    },
+  },
+  {
+    files: ["**/*.test.{ts,tsx}", "src/lib/demo-data.ts"],
+    rules: {
+      "@typescript-eslint/no-explicit-any": "off",
     },
   },
 );

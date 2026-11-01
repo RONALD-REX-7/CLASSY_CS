@@ -24,6 +24,8 @@
 import type { StudentProfile, AcademicResult } from "@/types";
 import type {
   AdmissionRule,
+  AdmissionRuleId,
+  DataSourceId,
   CalculationAudit,
   EntranceExamModel,
 } from "@/types/rules";
@@ -286,7 +288,7 @@ export function assessMedicalCompetitiveness(
 function createNeetQualificationRules(academicYear: string): AdmissionRule {
   const now = new Date().toISOString();
   return {
-    id: `neet-qual-${academicYear}` as any,
+    id: `neet-qual-${academicYear}` as AdmissionRuleId,
     authority: NEET_AUTHORITY,
     pathway: "qualification",
     academicYear,
@@ -336,7 +338,7 @@ function createNeetQualificationRules(academicYear: string): AdmissionRule {
       { subject: "Chemistry", mandatory: true },
       { subject: "Biology", mandatory: true },
     ],
-    source: "" as any,
+    source: "" as DataSourceId,
     sourceUrl: "https://neet.nta.ac.in",
     status: "VERIFIED",
     createdAt: now,

@@ -9,7 +9,7 @@ import { Background } from "@/components/background";
 import { Footer } from "@/components/footer";
 import { Navbar } from "@/components/navbar";
 import { Button } from "@/components/ui/button";
-import { Link, useLocation } from "react-router";
+import { Link } from "react-router";
 import { motion } from "framer-motion";
 import { useState, useMemo } from "react";
 import { useLocalStorage } from "@/hooks/use-local-storage";
@@ -103,7 +103,6 @@ const SECTIONS = [
 export default function MyClassy() {
   const [isDemoMode, setIsDemoMode] = useLocalStorage<boolean>(STORAGE.demoMode, false);
   const [activeSection, setActiveSection] = useState("profile");
-  const location = useLocation();
 
   // Real data
   const [subjects12] = useLocalStorage<SchoolSubject[]>(STORAGE.subjects12, []);
@@ -112,7 +111,7 @@ export default function MyClassy() {
   const [categoryStr] = useLocalStorage<string>(STORAGE.category, "General");
 
   // Use demo data when in demo mode
-  const profile = isDemoMode ? DEMO_PROFILE : { ...DEMO_PROFILE, ...storedProfile, id: (storedProfile.id || "user-profile") as any } as StudentProfile;
+  const profile = isDemoMode ? DEMO_PROFILE : ({ ...DEMO_PROFILE, ...storedProfile, id: (storedProfile.id || "user-profile") as unknown as StudentProfile["id"] } as StudentProfile);
   const class12Subjects = isDemoMode ? DEMO_CLASS12_SUBJECTS : subjects12;
   const tneaScore = isDemoMode ? DEMO_TNEA_SCORE : (tneaScoreStr ? parseFloat(tneaScoreStr) : undefined);
   const category = isDemoMode ? DEMO_CATEGORY : (categoryStr || "General");
@@ -157,7 +156,7 @@ export default function MyClassy() {
     ],
   };
 
-  const hasData = class12Subjects.length > 0 || tneaScore !== undefined;
+  const _hasData = class12Subjects.length > 0 || tneaScore !== undefined;
 
   return (
     <div className="min-h-screen overflow-x-clip">

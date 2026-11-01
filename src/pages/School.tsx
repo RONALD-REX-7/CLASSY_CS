@@ -100,7 +100,7 @@ export default function School() {
     [stream, classLevel],
   );
 
-  const hasErrors = hasValidationErrors(validation);
+  const _hasErrors = hasValidationErrors(validation);
 
   /* ── Handlers ── */
   const handleAddSubject = (subject: SchoolSubject) => {

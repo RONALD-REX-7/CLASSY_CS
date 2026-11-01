@@ -11,7 +11,6 @@
  */
 
 import { Card, CardContent } from "@/components/ui/card";
-import { ClassificationBadge } from "./explainable-result";
 import { cn } from "@/lib/utils";
 import { ArrowRight, TrendingUp, TrendingDown, Minus } from "lucide-react";
 import type { ScenarioComparison } from "@/types/college";

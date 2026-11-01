@@ -7,7 +7,7 @@
  * RULE: All types are pure — no runtime code, no React components.
  */
 
-import type { BoardId, StudentProfileId } from "./foundation";
+import type { StudentProfileId } from "./foundation";
 
 /* ------------------------------------------------------------------ */
 /* Class level                                                         */

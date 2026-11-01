@@ -101,7 +101,7 @@ function writeArray<T>(key: string, data: T[]): void {
  * Read a single JSON object from localStorage.
  * Returns null if missing or corrupt.
  */
-function readObject<T>(key: string): T | null {
+function _readObject<T>(key: string): T | null {
   try {
     const raw = window.localStorage.getItem(key);
     if (!raw) return null;
@@ -114,7 +114,7 @@ function readObject<T>(key: string): T | null {
 /**
  * Write a single JSON object to localStorage.
  */
-function writeObject<T>(key: string, data: T): void {
+function _writeObject<T>(key: string, data: T): void {
   try {
     window.localStorage.setItem(key, JSON.stringify(data));
   } catch {

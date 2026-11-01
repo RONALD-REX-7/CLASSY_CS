@@ -15,7 +15,7 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { calculateTneaScore, evaluateTneaEligibility, TNEA_CATEGORIES } from "../tnea/engine";
+import { calculateTneaScore, evaluateTneaEligibility } from "../tnea/engine";
 import { evaluateJeeMainEligibility, checkJeeAdvancedQualification } from "../jee-main/engine";
 import { evaluateIitAdmissionEligibility, checkTop20Percentile } from "../jee-advanced/engine";
 import { evaluateNeetQualification, assessMedicalCompetitiveness } from "../neet/engine";

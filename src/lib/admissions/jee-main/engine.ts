@@ -21,9 +21,10 @@
 import type { StudentProfile, AcademicResult } from "@/types";
 import type {
   AdmissionRule,
+  AdmissionRuleId,
+  DataSourceId,
   CalculationAudit,
   EntranceExamModel,
-  EligibilityRule,
 } from "@/types/rules";
 import {
   evaluateRules,
@@ -280,7 +281,7 @@ export function checkJeeAdvancedQualification(
 function createJeeMainCoreRules(academicYear: string): AdmissionRule {
   const now = new Date().toISOString();
   return {
-    id: `jee-main-core-${academicYear}` as any,
+    id: `jee-main-core-${academicYear}` as AdmissionRuleId,
     authority: JEE_MAIN_AUTHORITY,
     pathway: "core",
     academicYear,
@@ -309,7 +310,7 @@ function createJeeMainCoreRules(academicYear: string): AdmissionRule {
       { subject: "Chemistry", mandatory: true },
       { subject: "Mathematics", mandatory: true },
     ],
-    source: "" as any,
+    source: "" as DataSourceId,
     sourceUrl: "https://jeemain.nta.ac.in",
     status: "VERIFIED",
     createdAt: now,

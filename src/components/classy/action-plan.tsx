@@ -13,9 +13,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import {
-  ArrowRight,
   CheckCircle2,
-  AlertCircle,
   Info,
   BookOpen,
   Target,

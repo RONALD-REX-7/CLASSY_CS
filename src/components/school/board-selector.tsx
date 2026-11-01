@@ -30,7 +30,7 @@ export function BoardSelector({
   onStreamChange,
   disabled,
 }: BoardSelectorProps) {
-  const board = getBoardById(boardId);
+  const _board = getBoardById(boardId);
   const availableStreams = getStreamsForBoard(boardId, classLevel);
   const showStream = classLevel >= 11;
 

@@ -1,4 +1,3 @@
-import type { ExamType } from "@/types";
 /**
  * College recommendation engine — "What can I target?"
  *
@@ -15,7 +14,7 @@ import type { ExamType } from "@/types";
  * Every recommendation must explain WHY it appeared.
  */
 
-import type { StudentProfile, AcademicResult } from "@/types";
+import type { StudentProfile, AcademicResult, CollegeId, CourseId, ExamType } from "@/types";
 import type {
   CollegeExtended,
   CollegeRecommendation,
@@ -71,7 +70,7 @@ export function generateRecommendations(
   audit: RecommendationAudit[];
   insufficientData: InsufficientData[];
 } {
-  const { cutoffs, colleges, category, authority, preferredCourses, preferredLocations } = input;
+  const { cutoffs, colleges, category, authority, preferredCourses: _preferredCourses, preferredLocations: _preferredLocations } = input;
   const recommendations: CollegeRecommendation[] = [];
   const audit: RecommendationAudit[] = [];
   const insufficientData: InsufficientData[] = [];
@@ -139,9 +138,9 @@ export function generateRecommendations(
     );
 
     const recommendation: CollegeRecommendation = {
-      collegeId: collegeId as any,
+      collegeId: collegeId as CollegeId,
       collegeName: college.name,
-      courseId: courseId as any,
+      courseId: courseId as CourseId,
       courseName: primaryCutoff.courseId, // Using courseId as display name placeholder
       classification: classification.classification,
       explanation,
@@ -166,8 +165,8 @@ export function generateRecommendations(
     // Build audit trail
     audit.push({
       recommendationId: `${collegeId}-${courseId}`,
-      collegeId: collegeId as any,
-      courseId: courseId as any,
+      collegeId: collegeId as CollegeId,
+      courseId: courseId as CourseId,
       eligibilityPassed: classification.eligibilityPassed,
       scoreComparison: {
         studentScore: input.entranceScore,
@@ -297,7 +296,7 @@ export function createWhatIfScenario(
     label,
     profileId: baseInput.profile.id,
     modifiedScores: modifiedScores.map((ms) => ({
-      examType: ms.examType as any,
+      examType: ms.examType as ExamType,
       totalMarks: ms.totalMarks,
     })),
     recomputedResults: {
@@ -392,7 +391,7 @@ export function assessAdmissionReadiness(
   entranceScore?: number,
 ): import("@/types/college").AdmissionReadiness {
   let totalScore = 0;
-  const maxTotal = 5;
+  const _maxTotal = 5;
 
   // Eligibility completeness
   const eligibilityScore = profile.category && profile.state ? 1 : 0.5;

@@ -19,16 +19,11 @@
  */
 
 import type {
-  StudentProfile,
-  AcademicResult,
-} from "@/types";
-import type {
   AdmissionRule,
   CalculationAudit,
   ConflictStatus,
   DataConflict,
   EligibilityRule,
-  RuleStatus,
 } from "@/types/rules";
 
 /* ------------------------------------------------------------------ */
