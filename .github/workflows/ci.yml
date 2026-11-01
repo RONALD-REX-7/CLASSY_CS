@@ -24,10 +24,10 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm install --legacy-peer-deps --no-audit
+        run: npm install --legacy-peer-deps --no-audit --include=dev
 
       - name: TypeScript typecheck
-        run: npx -p typescript tsc --noEmit
+        run: node ./node_modules/typescript/bin/tsc --noEmit
 
       - name: Run unit tests
         run: npm test
