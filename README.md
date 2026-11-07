@@ -1,5 +1,15 @@
 <div align="center">
 
+<img src="portfolio-identity.svg" alt="CLASSY CS — project portfolio banner" width="100%">
+
+[← Back to Ronald Rex's engineering portfolio](https://github.com/RONALD-REX-7)
+
+</div>
+
+---
+
+<div align="center">
+
 # Classy CS — Academic Planning, GPA/CGPA & Admission Engine
 
 **An auditable, client-first academic evaluation and admission planning platform for Indian engineering & higher education.**
