@@ -165,6 +165,12 @@ npm run build
 
 ---
 
+## 👨‍💻 Project Maintainer & Architecture
+
+- **Lead Developer**: [Ronald Rex](https://github.com/RONALD-REX-7) — Full-stack architecture, deterministic admission cutoff logic, and portfolio presentation.
+
+---
+
 ## 📄 License
 
 This project is licensed under the **[MIT License](LICENSE)**.
