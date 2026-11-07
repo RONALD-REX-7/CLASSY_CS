@@ -1,5 +1,15 @@
 <div align="center">
 
+<img src="portfolio-identity.svg" alt="CLASSY CS — project portfolio banner" width="100%">
+
+[← Back to Ronald Rex's engineering portfolio](https://github.com/RONALD-REX-7)
+
+</div>
+
+---
+
+<div align="center">
+
 # Classy CS — Academic Planning, GPA/CGPA & Admission Engine
 
 **An auditable, client-first academic evaluation and admission planning platform for Indian engineering & higher education.**
@@ -152,6 +162,12 @@ npm run build
 - **Zero Data Exposure**: No personal student credentials, university register numbers, or identifying marks are retained or transmitted to external servers.
 - **Privacy-Safe Auth**: Production OTP credentials use environment-variable-injected API keys (`AUTH_EMAIL_API_KEY`); fallback mock auth is provided for local exploration.
 - **Client-Side Execution**: All GPA/CGPA mathematics and admission cutoff evaluations execute entirely inside the client's browser without external API dependence.
+
+---
+
+## 👨‍💻 Project Maintainer & Architecture
+
+- **Lead Developer**: [Ronald Rex](https://github.com/RONALD-REX-7) — Full-stack architecture, deterministic admission cutoff logic, and portfolio presentation.
 
 ---
 
